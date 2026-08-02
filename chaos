@@ -1,0 +1,62 @@
+#!/usr/bin/env bash
+# chaos — small, time-boxed chaos experiments. Every experiment REQUIRES
+# --duration and cleans up after itself (network rules removed on exit).
+#
+#   chaos cpu     --duration 60s [--workers 2] [--load 80]
+#   chaos mem     --duration 60s [--bytes 256M] [--workers 1]
+#   chaos io      --duration 60s [--workers 2]
+#   chaos delay   --duration 60s [--ms 200] [--jitter 50] [--dev eth0]
+#   chaos loss    --duration 60s [--pct 10] [--dev eth0]
+#   chaos limit   --duration 60s [--rate 1mbit] [--dev eth0]
+#
+# Network experiments act on this container's netns — share the target pod's
+# network (sidecar / `kubectl debug --target`) and grant NET_ADMIN.
+set -euo pipefail
+
+usage() { grep '^#' "$0" | sed 's/^# \{0,1\}//'; exit "${1:-0}"; }
+
+CMD="${1:-}"; shift || true
+DURATION="" WORKERS=2 LOAD=80 BYTES=256M MS=200 JITTER=50 PCT=10 RATE=1mbit DEV=eth0
+while [[ $# -gt 0 ]]; do
+  case "$1" in
+    --duration) DURATION="$2"; shift 2 ;;
+    --workers)  WORKERS="$2";  shift 2 ;;
+    --load)     LOAD="$2";     shift 2 ;;
+    --bytes)    BYTES="$2";    shift 2 ;;
+    --ms)       MS="$2";       shift 2 ;;
+    --jitter)   JITTER="$2";   shift 2 ;;
+    --pct)      PCT="$2";      shift 2 ;;
+    --rate)     RATE="$2";     shift 2 ;;
+    --dev)      DEV="$2";      shift 2 ;;
+    --help|-h)  usage ;;
+    *) echo "chaos: unknown flag $1" >&2; usage 64 ;;
+  esac
+done
+
+[[ -n "$CMD" && "$CMD" != "--help" && "$CMD" != "-h" ]] || usage
+[[ -n "$DURATION" ]] || { echo "chaos: --duration is required (safety rail)" >&2; exit 64; }
+
+to_seconds() { local d="$1"; case "$d" in *m) echo $(( ${d%m} * 60 ));; *s) echo "${d%s}";; *) echo "$d";; esac; }
+SECS="$(to_seconds "$DURATION")"
+
+netem_cleanup() { tc qdisc del dev "$DEV" root 2>/dev/null || true; echo "chaos: network rules cleaned up"; }
+
+echo "chaos: $CMD for ${SECS}s"
+case "$CMD" in
+  cpu) exec stress-ng --cpu "$WORKERS" --cpu-load "$LOAD" --timeout "${SECS}s" --metrics-brief ;;
+  mem) exec stress-ng --vm "$WORKERS" --vm-bytes "$BYTES" --timeout "${SECS}s" --metrics-brief ;;
+  io)  exec stress-ng --io "$WORKERS" --hdd 1 --timeout "${SECS}s" --metrics-brief ;;
+  delay)
+    trap netem_cleanup EXIT INT TERM
+    tc qdisc add dev "$DEV" root netem delay "${MS}ms" "${JITTER}ms"
+    sleep "$SECS" ;;
+  loss)
+    trap netem_cleanup EXIT INT TERM
+    tc qdisc add dev "$DEV" root netem loss "${PCT}%"
+    sleep "$SECS" ;;
+  limit)
+    trap netem_cleanup EXIT INT TERM
+    tc qdisc add dev "$DEV" root tbf rate "$RATE" burst 32kbit latency 400ms
+    sleep "$SECS" ;;
+  *) echo "chaos: unknown experiment '$CMD'" >&2; usage 64 ;;
+esac
