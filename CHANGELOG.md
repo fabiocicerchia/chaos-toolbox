@@ -8,16 +8,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ### Added
-### Changed
-### Deprecated
-### Removed
-### Fixed
-### Security
 
-## [0.1.0] - YYYY-MM-DD
+- Six experiments — `cpu`, `mem`, `io` (stress-ng) and `delay`, `loss`,
+  `limit` (tc/netem) — in one image, each requiring `--duration` and
+  tearing its qdisc down on exit.
 
-### Added
-- Initial release.
-
-[Unreleased]: https://github.com/fabiocicerchia/chaos-toolbox/compare/v0.1.0...HEAD
-[0.1.0]: https://github.com/fabiocicerchia/chaos-toolbox/releases/tag/v0.1.0
+Not yet released.

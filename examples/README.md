@@ -1,6 +1,7 @@
 # Examples
 
-Runnable, self-contained examples. Each subfolder (or file) should run with a
-single command and show one clear use case.
+- [`basic/`](basic) — a target service and a latency experiment against it,
+  with Compose, so you can watch a real response time move.
 
-- `basic/` — minimal end-to-end example.
+Every experiment in these examples is time-boxed, because every experiment has
+to be: `--duration` has no default.

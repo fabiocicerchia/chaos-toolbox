@@ -1,6 +1,9 @@
 # Documentation
 
-- [Architecture](architecture.md) — high-level design and components.
-- [Getting Started](getting-started.md) — setup and first run.
+- [Getting Started](getting-started.md) — the first experiment, and how to
+  point one at a real workload without missing.
+- [Architecture](architecture.md) — the two experiment families, and why only
+  one of them needs a cleanup trap.
 
-Add pages here as the project grows (API reference, guides, ADRs).
+The [README](../README.md) covers what the experiments are. These pages cover
+running them somewhere they actually land.

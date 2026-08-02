@@ -1,5 +1,7 @@
 site_name: chaos-toolbox
-site_description: One-line description.
+site_description: >-
+  stress-ng and tc/netem chaos experiments in one small image — every
+  experiment needs a duration, and every network rule is removed on exit.
 repo_url: https://github.com/fabiocicerchia/chaos-toolbox
 docs_dir: docs
 
