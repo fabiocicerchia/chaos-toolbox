@@ -1,6 +1,6 @@
 # chaos-toolbox — stress-ng + tc-based network chaos for lightweight
 # experiments without installing a full Chaos Mesh.
-FROM alpine:3.22
+FROM alpine:3.24
 LABEL org.opencontainers.image.title="chaos-toolbox" \
       org.opencontainers.image.description="stress-ng + tc network chaos for lightweight resilience experiments" \
       org.opencontainers.image.licenses="Apache-2.0" \
