@@ -1,0 +1,21 @@
+# A target service, and a chaos container sharing its network namespace.
+#
+# `network_mode: "service:app"` is the whole point of this file: it puts the
+# chaos container inside the app's netns, so `tc` acts on the interface the app
+# actually serves from. Without it the experiment runs against nothing.
+services:
+  app:
+    image: nginx:1.29-alpine
+    ports:
+      - "8080:80"
+
+  chaos:
+    image: fabiocicerchia/chaos-toolbox
+    # Same network namespace as `app`, so eth0 here is eth0 there.
+    network_mode: "service:app"
+    cap_add:
+      - NET_ADMIN
+    depends_on:
+      - app
+    # 200ms +/- 50ms of latency for 60 seconds, then removed automatically.
+    command: ["delay", "--duration", "60s", "--ms", "200", "--jitter", "50"]
