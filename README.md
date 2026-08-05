@@ -22,7 +22,35 @@ chaos io    --duration 60s [--workers 2]
 chaos delay --duration 60s [--ms 200] [--jitter 50]
 chaos loss  --duration 60s [--pct 10]
 chaos limit --duration 60s [--rate 1mbit]
+chaos kill  --duration 60s --target <pattern> [--every 20s]
+            [--mode docker|k8s] [--namespace ns] [--signal SIGKILL] [--dry-run]
 ```
+
+### `chaos kill`
+
+Restarts matching workloads repeatedly for the window, then stops — the
+"does anything actually notice a pod dying?" experiment.
+
+```sh
+# Kubernetes: label selector, one pod deleted every 20s for 5 minutes
+chaos kill --duration 5m --target app=checkout --namespace prod
+
+# Docker: name pattern, SIGTERM instead of SIGKILL
+chaos kill --duration 2m --target 'web_' --mode docker --signal SIGTERM
+
+# See what it would hit first — always worth one run
+chaos kill --duration 30s --target app=checkout --dry-run
+```
+
+The runtime is auto-detected (Docker socket present → `docker`, otherwise
+`kubectl`); `--mode` overrides it. **`--target` has no default and never will**
+— the blast radius of a typo should be one workload, not a cluster. In k8s mode
+a target containing `=` is a label selector, anything else is a name pattern;
+pods are deleted with `--wait=false`, because the experiment is watching the
+controller replace them, not waiting on graceful shutdown.
+
+Docker mode needs the socket mounted (`-v /var/run/docker.sock:/var/run/docker.sock`);
+k8s mode needs a service account that can `list` and `delete` pods.
 
 ## Install
 
