@@ -8,15 +8,24 @@
 #   chaos delay   --duration 60s [--ms 200] [--jitter 50] [--dev eth0]
 #   chaos loss    --duration 60s [--pct 10] [--dev eth0]
 #   chaos limit   --duration 60s [--rate 1mbit] [--dev eth0]
+#   chaos kill    --duration 60s --target <pattern> [--every 20s]
+#                 [--mode docker|k8s] [--namespace ns] [--signal SIGKILL]
+#                 [--dry-run]
 #
 # Network experiments act on this container's netns — share the target pod's
 # network (sidecar / `kubectl debug --target`) and grant NET_ADMIN.
+#
+# `kill` restarts things repeatedly for the window, then stops. It needs
+# --target: there is no "everything" default, because the blast radius of a
+# typo should be one workload, not a cluster. Docker mode needs the socket
+# mounted; k8s mode needs a kubeconfig/service account that can delete pods.
 set -euo pipefail
 
 usage() { grep '^#' "$0" | sed 's/^# \{0,1\}//'; exit "${1:-0}"; }
 
 CMD="${1:-}"; shift || true
 DURATION="" WORKERS=2 LOAD=80 BYTES=256M MS=200 JITTER=50 PCT=10 RATE=1mbit DEV=eth0
+TARGET="" EVERY=20s MODE="" NAMESPACE="" SIGNAL=SIGKILL DRY_RUN=0
 while [[ $# -gt 0 ]]; do
   case "$1" in
     --duration) DURATION="$2"; shift 2 ;;
@@ -28,6 +37,12 @@ while [[ $# -gt 0 ]]; do
     --pct)      PCT="$2";      shift 2 ;;
     --rate)     RATE="$2";     shift 2 ;;
     --dev)      DEV="$2";      shift 2 ;;
+    --target)   TARGET="$2";   shift 2 ;;
+    --every)    EVERY="$2";    shift 2 ;;
+    --mode)     MODE="$2";     shift 2 ;;
+    --namespace) NAMESPACE="$2"; shift 2 ;;
+    --signal)   SIGNAL="$2";   shift 2 ;;
+    --dry-run)  DRY_RUN=1;     shift ;;
     --help|-h)  usage ;;
     *) echo "chaos: unknown flag $1" >&2; usage 64 ;;
   esac
@@ -40,6 +55,68 @@ to_seconds() { local d="$1"; case "$d" in *m) echo $(( ${d%m} * 60 ));; *s) echo
 SECS="$(to_seconds "$DURATION")"
 
 netem_cleanup() { tc qdisc del dev "$DEV" root 2>/dev/null || true; echo "chaos: network rules cleaned up"; }
+
+# --- kill ------------------------------------------------------------------
+# Auto-detect the runtime rather than defaulting to one: guessing "docker" on a
+# Kubernetes node and matching container names directly would bypass the
+# controller that is supposed to restart the workload.
+detect_mode() {
+  if [[ -S /var/run/docker.sock ]]; then echo docker; return; fi
+  if [[ -n "${KUBERNETES_SERVICE_HOST:-}" ]] || command -v kubectl >/dev/null 2>&1; then
+    echo k8s; return
+  fi
+  echo "chaos: cannot tell docker from k8s — pass --mode" >&2; exit 64
+}
+
+kill_targets_docker() {
+  docker ps --filter "name=$TARGET" --format '{{.Names}}'
+}
+
+kill_targets_k8s() {
+  # --target is a label selector when it contains '=', otherwise a name pattern.
+  if [[ "$TARGET" == *=* ]]; then
+    kubectl get pods ${NAMESPACE:+-n "$NAMESPACE"} -l "$TARGET" -o name 2>/dev/null
+  else
+    kubectl get pods ${NAMESPACE:+-n "$NAMESPACE"} -o name 2>/dev/null | grep -E "$TARGET" || true
+  fi
+}
+
+kill_one_docker() { docker kill --signal="$SIGNAL" "$1" >/dev/null; }
+# --wait=false: the point is to remove the pod and watch the controller notice,
+# not to block this experiment on terminationGracePeriodSeconds.
+kill_one_k8s() { kubectl delete "$1" ${NAMESPACE:+-n "$NAMESPACE"} --wait=false >/dev/null; }
+
+run_kill() {
+  [[ -n "$TARGET" ]] || { echo "chaos: kill requires --target (no default: a typo must not take out a cluster)" >&2; exit 64; }
+  [[ -n "$MODE" ]] || MODE="$(detect_mode)"
+  local every killed=0 deadline
+  every="$(to_seconds "$EVERY")"
+  deadline=$(( $(date +%s) + SECS ))
+  echo "chaos: kill mode=$MODE target='$TARGET' every=${every}s$( ((DRY_RUN)) && echo ' (dry run)')"
+  while [[ $(date +%s) -lt $deadline ]]; do
+    local targets
+    targets="$("kill_targets_$MODE")"
+    if [[ -z "$targets" ]]; then
+      echo "chaos: no targets matched '$TARGET'"
+    else
+      while IFS= read -r t; do
+        [[ -n "$t" ]] || continue
+        if ((DRY_RUN)); then
+          echo "chaos: would kill $t"
+        else
+          echo "chaos: killing $t"
+          "kill_one_$MODE" "$t" || echo "chaos: kill failed for $t (already gone?)"
+          killed=$((killed + 1))
+        fi
+      done <<< "$targets"
+    fi
+    # Stop early rather than overshooting the window on the last sleep.
+    local remaining=$(( deadline - $(date +%s) ))
+    (( remaining <= 0 )) && break
+    sleep "$(( every < remaining ? every : remaining ))"
+  done
+  echo "chaos: kill finished — $killed kill(s) over ${SECS}s"
+}
 
 echo "chaos: $CMD for ${SECS}s"
 case "$CMD" in
@@ -58,5 +135,6 @@ case "$CMD" in
     trap netem_cleanup EXIT INT TERM
     tc qdisc add dev "$DEV" root tbf rate "$RATE" burst 32kbit latency 400ms
     sleep "$SECS" ;;
+  kill) run_kill ;;
   *) echo "chaos: unknown experiment '$CMD'" >&2; usage 64 ;;
 esac
