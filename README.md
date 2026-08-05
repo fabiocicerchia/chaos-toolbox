@@ -1,5 +1,11 @@
 # chaos-toolbox
 
+[![CI](https://github.com/fabiocicerchia/chaos-toolbox/actions/workflows/ci.yml/badge.svg)](https://github.com/fabiocicerchia/chaos-toolbox/actions/workflows/ci.yml)
+[![Code Quality](https://github.com/fabiocicerchia/chaos-toolbox/actions/workflows/code-quality.yml/badge.svg)](https://github.com/fabiocicerchia/chaos-toolbox/actions/workflows/code-quality.yml)
+[![Security](https://github.com/fabiocicerchia/chaos-toolbox/actions/workflows/security.yml/badge.svg)](https://github.com/fabiocicerchia/chaos-toolbox/actions/workflows/security.yml)
+[![License](https://img.shields.io/badge/license-Apache_2.0-blue.svg)](LICENSE)
+[![OpenSSF Scorecard](https://api.securityscorecards.dev/projects/github.com/fabiocicerchia/chaos-toolbox/badge)](https://securityscorecards.dev/viewer/?uri=github.com/fabiocicerchia/chaos-toolbox)
+
 **stress-ng + tc/netem chaos experiments** in one small image — CPU, memory
 and I/O pressure, latency, packet loss and bandwidth limits — for lightweight
 resilience testing without installing a full Chaos Mesh.
@@ -16,6 +22,13 @@ chaos io    --duration 60s [--workers 2]
 chaos delay --duration 60s [--ms 200] [--jitter 50]
 chaos loss  --duration 60s [--pct 10]
 chaos limit --duration 60s [--rate 1mbit]
+```
+
+## Install
+
+```sh
+make build                       # builds fabiocicerchia/chaos-toolbox:0.1.0 locally
+docker pull fabiocicerchia/chaos-toolbox:0.1.0
 ```
 
 ## Usage
@@ -41,16 +54,13 @@ docker run --rm --network container:my-app --cap-add NET_ADMIN \
   fabiocicerchia/chaos-toolbox loss --duration 30s --pct 15
 ```
 
-## Status & roadmap
-
-- [x] 6 experiments, duration rail, netem auto-cleanup, tests
-- [ ] `chaos kill` (pumba-style container restarts, Docker socket mode)
-- [ ] Scoped netem (per-destination CIDR filters, not whole-interface)
-- [ ] Experiment report (before/after latency percentiles)
-
 ## Development
 
 `make build` / `make lint` / `make test` / `make release`.
+
+## Documentation
+
+Full docs live in [`docs/`](docs/). Runnable examples live in [`examples/`](examples/).
 
 ## License
 
