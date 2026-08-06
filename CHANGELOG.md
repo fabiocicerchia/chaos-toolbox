@@ -5,6 +5,20 @@ All notable changes to this project are documented here.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## 1.0.0 (2026-08-06)
+
+
+### Features
+
+* **kill:** restart containers and pods, Docker or Kubernetes ([4401768](https://github.com/fabiocicerchia/chaos-toolbox/commit/4401768f8d1e92c855966e350924689212b5b6b4))
+* **kill:** restart containers and pods, Docker or Kubernetes ([8a7c14f](https://github.com/fabiocicerchia/chaos-toolbox/commit/8a7c14fa564f4d72361e8cd5c57475202d579e63))
+
+
+### Bug Fixes
+
+* **ci:** stop security workflows failing on private repos ([#9](https://github.com/fabiocicerchia/chaos-toolbox/issues/9)) ([4265bdb](https://github.com/fabiocicerchia/chaos-toolbox/commit/4265bdb2959c0607b7f456a6d32e19703a06d330))
+* **pre-commit:** stop check-yaml failing on Helm templates and multi-doc manifests ([a95f29b](https://github.com/fabiocicerchia/chaos-toolbox/commit/a95f29bcf1c52638ec46e60efde090ade2e2c3fe))
+
 ## [Unreleased]
 
 ### Added
