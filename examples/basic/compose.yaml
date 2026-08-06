@@ -8,9 +8,16 @@ services:
     image: nginx:1.29-alpine
     ports:
       - "8080:80"
+    # Bounded so the example is copy-pasteable into somewhere real. An
+    # unbounded container is scheduled without guardrails and pushes nodes
+    # towards over-provisioning.
+    mem_limit: 128m
+    cpus: 0.5
 
   chaos:
     image: fabiocicerchia/chaos-toolbox
+    mem_limit: 128m
+    cpus: 0.5
     # Same network namespace as `app`, so eth0 here is eth0 there.
     network_mode: "service:app"
     cap_add:
