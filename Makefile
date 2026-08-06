@@ -1,5 +1,5 @@
-IMAGE     ?= fabiocicerchia/chaos-toolbox
-VERSION   ?= 0.1.0
+IMAGE     ?= ghcr.io/fabiocicerchia/chaos-toolbox
+VERSION   ?= 1.0.0
 PLATFORMS ?= linux/amd64,linux/arm64
 
 .PHONY: build lint test push release help

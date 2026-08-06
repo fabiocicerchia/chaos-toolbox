@@ -55,8 +55,8 @@ k8s mode needs a service account that can `list` and `delete` pods.
 ## Install
 
 ```sh
-make build                       # builds fabiocicerchia/chaos-toolbox:0.1.0 locally
-docker pull fabiocicerchia/chaos-toolbox:0.1.0
+make build                       # builds ghcr.io/fabiocicerchia/chaos-toolbox:1.0.0 locally
+docker pull ghcr.io/fabiocicerchia/chaos-toolbox:1.0.0
 ```
 
 ## Usage
@@ -64,14 +64,14 @@ docker pull fabiocicerchia/chaos-toolbox:0.1.0
 Stress an existing pod's CPU (ephemeral container shares the cgroup budget):
 
 ```sh
-kubectl debug -it my-pod --image=fabiocicerchia/chaos-toolbox --target=app \
+kubectl debug -it my-pod --image=ghcr.io/fabiocicerchia/chaos-toolbox --target=app \
   -- chaos cpu --duration 2m --load 90
 ```
 
 Add 200 ms latency to a pod's traffic (needs `NET_ADMIN`, shares the netns):
 
 ```sh
-kubectl debug -it my-pod --image=fabiocicerchia/chaos-toolbox --target=app \
+kubectl debug -it my-pod --image=ghcr.io/fabiocicerchia/chaos-toolbox --target=app \
   --profile=netadmin -- chaos delay --duration 60s --ms 200
 ```
 
@@ -79,7 +79,7 @@ Docker Compose resilience testing:
 
 ```sh
 docker run --rm --network container:my-app --cap-add NET_ADMIN \
-  fabiocicerchia/chaos-toolbox loss --duration 30s --pct 15
+  ghcr.io/fabiocicerchia/chaos-toolbox loss --duration 30s --pct 15
 ```
 
 ## Development
