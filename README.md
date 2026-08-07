@@ -5,6 +5,7 @@
 [![Security](https://github.com/fabiocicerchia/chaos-toolbox/actions/workflows/security.yml/badge.svg)](https://github.com/fabiocicerchia/chaos-toolbox/actions/workflows/security.yml)
 [![License](https://img.shields.io/badge/license-Apache_2.0-blue.svg)](LICENSE)
 [![OpenSSF Scorecard](https://api.securityscorecards.dev/projects/github.com/fabiocicerchia/chaos-toolbox/badge)](https://securityscorecards.dev/viewer/?uri=github.com/fabiocicerchia/chaos-toolbox)
+[![CI carbon](https://img.shields.io/endpoint?url=https://raw.githubusercontent.com/fabiocicerchia/chaos-toolbox/gh-pages/badge.json)](.github/workflows/carbon-badge.yml)
 
 **stress-ng + tc/netem chaos experiments** in one small image — CPU, memory
 and I/O pressure, latency, packet loss and bandwidth limits — for lightweight
