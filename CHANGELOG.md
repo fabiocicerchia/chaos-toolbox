@@ -5,6 +5,13 @@ All notable changes to this project are documented here.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.0.1](https://github.com/fabiocicerchia/chaos-toolbox/compare/v1.0.0...v1.0.1) (2026-08-10)
+
+
+### Bug Fixes
+
+* publish the image from the release job so it actually runs ([1fa4543](https://github.com/fabiocicerchia/chaos-toolbox/commit/1fa45430901671fae541638a9970d1af7eb5556b))
+
 ## 1.0.0 (2026-08-06)
 
 
