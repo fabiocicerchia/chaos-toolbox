@@ -15,6 +15,11 @@
 # Network experiments act on this container's netns — share the target pod's
 # network (sidecar / `kubectl debug --target`) and grant NET_ADMIN.
 #
+# --probe URL turns any experiment into an experiment REPORT: latency is
+# sampled against that URL before injection and again during it, and the two
+# sets of percentiles are printed (and written as JSON with --report FILE).
+# Without it an experiment proves it ran, not what it did.
+#
 # `kill` restarts things repeatedly for the window, then stops. It needs
 # --target: there is no "everything" default, because the blast radius of a
 # typo should be one workload, not a cluster. Docker mode needs the socket
@@ -26,6 +31,9 @@ usage() { grep '^#' "$0" | sed 's/^# \{0,1\}//'; exit "${1:-0}"; }
 CMD="${1:-}"; shift || true
 DURATION="" WORKERS=2 LOAD=80 BYTES=256M MS=200 JITTER=50 PCT=10 RATE=1mbit DEV=eth0
 TARGET="" EVERY=20s MODE="" NAMESPACE="" SIGNAL=SIGKILL DRY_RUN=0
+PROBE="" REPORT="" BASELINE=10s PROBE_INTERVAL=1
+# Percentiles from fewer samples than this are noise dressed as evidence.
+MIN_SAMPLES=5
 while [[ $# -gt 0 ]]; do
   case "$1" in
     --duration) DURATION="$2"; shift 2 ;;
@@ -43,6 +51,10 @@ while [[ $# -gt 0 ]]; do
     --namespace) NAMESPACE="$2"; shift 2 ;;
     --signal)   SIGNAL="$2";   shift 2 ;;
     --dry-run)  DRY_RUN=1;     shift ;;
+    --probe)    PROBE="$2";    shift 2 ;;
+    --report)   REPORT="$2";   shift 2 ;;
+    --baseline) BASELINE="$2"; shift 2 ;;
+    --probe-interval) PROBE_INTERVAL="$2"; shift 2 ;;
     --help|-h)  usage ;;
     *) echo "chaos: unknown flag $1" >&2; usage 64 ;;
   esac
@@ -118,7 +130,128 @@ run_kill() {
   echo "chaos: kill finished — $killed kill(s) over ${SECS}s"
 }
 
+
+# --- experiment report -------------------------------------------------------
+# An experiment that only proves it ran is not evidence. --probe samples the
+# same target twice — once before the fault, once during — so the report can
+# state what the fault did rather than that it happened.
+#
+# The probe is a plain HTTP GET timed by curl. Deliberately not a load
+# generator: the point is to observe the path a real client takes while the
+# fault is applied, and a tool that saturates the target would be measuring
+# itself.
+
+# sample_latency <seconds> <outfile> — append "<seconds> <http_code>" per probe.
+sample_latency() {
+  local until_ts=$(( $(date +%s) + $1 )) out="$2"
+  : > "$out"
+  while [[ $(date +%s) -lt $until_ts ]]; do
+    # -o /dev/null: the body is irrelevant and could be large. --max-time so a
+    # hung request cannot outlive the phase it belongs to.
+    curl -sS -o /dev/null --max-time 10 -w '%{time_total} %{http_code}\n' "$PROBE" >> "$out" 2>/dev/null \
+      || echo "0 000" >> "$out"   # transport failure counts as an error sample
+    sleep "$PROBE_INTERVAL"
+  done
+}
+
+# percentiles <file> — emits "count errors p50 p90 p99" (seconds, 4dp).
+#
+# Sorted with sort(1) rather than inside awk: asort() is a gawk extension and
+# the image ships busybox awk, so an awk-only version would work here and fail
+# in the container.
+#
+# Nearest-rank on the successful samples: with tens of samples an interpolating
+# definition would imply a precision the sample size does not support. Errors
+# are counted, not timed — a request that failed has no latency worth putting
+# in a percentile.
+percentiles() {
+  local file="$1" total errors
+  total=$(grep -c . "$file" 2>/dev/null || echo 0)
+  errors=$(awk '$2 !~ /^[23]/ {c++} END {print c+0}' "$file")
+  awk '$2 ~ /^[23]/ {print $1}' "$file" | sort -n | awk -v total="$total" -v errors="$errors" '
+    { v[++k] = $1 }
+    END {
+      if (k == 0) { printf "%d %d - - -\n", total, errors; exit }
+      printf "%d %d %.4f %.4f %.4f\n", total, errors,
+        v[int((k * 50 + 99) / 100)], v[int((k * 90 + 99) / 100)], v[int((k * 99 + 99) / 100)]
+    }'
+}
+
+emit_report() {
+  local base="$1" during="$2"
+  read -r b_n b_err b_p50 b_p90 b_p99 <<< "$(percentiles "$base")"
+  read -r d_n d_err d_p50 d_p90 d_p99 <<< "$(percentiles "$during")"
+
+  local params
+  case "$CMD" in
+    delay) params="{\"ms\":$MS,\"jitter_ms\":$JITTER,\"dev\":\"$DEV\"}" ;;
+    loss)  params="{\"pct\":$PCT,\"dev\":\"$DEV\"}" ;;
+    limit) params="{\"rate\":\"$RATE\",\"dev\":\"$DEV\"}" ;;
+    cpu)   params="{\"workers\":$WORKERS,\"load\":$LOAD}" ;;
+    mem)   params="{\"workers\":$WORKERS,\"bytes\":\"$BYTES\"}" ;;
+    io)    params="{\"workers\":$WORKERS}" ;;
+    kill)  params="{\"target\":\"$TARGET\",\"every\":\"$EVERY\",\"signal\":\"$SIGNAL\"}" ;;
+    *)     params="{}" ;;
+  esac
+
+  echo
+  echo "chaos: experiment report — $CMD for ${SECS}s against $PROBE"
+  printf '  %-10s %7s %7s %9s %9s %9s\n' phase samples errors p50 p90 p99
+  report_row baseline "$b_n" "$b_err" "$b_p50" "$b_p90" "$b_p99"
+  report_row fault    "$d_n" "$d_err" "$d_p50" "$d_p90" "$d_p99"
+  if [[ "$b_n" -lt $MIN_SAMPLES || "$d_n" -lt $MIN_SAMPLES ]]; then
+    echo "  note: fewer than $MIN_SAMPLES samples in a phase — percentiles withheld;"
+    echo "        lengthen --duration/--baseline or shorten --probe-interval."
+  fi
+
+  [[ -n "$REPORT" ]] || return 0
+  cat > "$REPORT" <<JSON
+{
+  "experiment": "$CMD",
+  "parameters": $params,
+  "duration_seconds": $SECS,
+  "probe": "$PROBE",
+  "min_samples": $MIN_SAMPLES,
+  "baseline": $(phase_json "$b_n" "$b_err" "$b_p50" "$b_p90" "$b_p99"),
+  "fault": $(phase_json "$d_n" "$d_err" "$d_p50" "$d_p90" "$d_p99")
+}
+JSON
+  echo "  report written to $REPORT"
+}
+
+# report_row/phase_json withhold percentiles below MIN_SAMPLES rather than
+# printing a p99 derived from three requests, which is a number people quote.
+report_row() {
+  if [[ "$2" -lt $MIN_SAMPLES || "$4" == "-" ]]; then
+    printf '  %-10s %7s %7s %9s %9s %9s\n' "$1" "$2" "$3" "n/a" "n/a" "n/a"
+  else
+    printf '  %-10s %7s %7s %8ss %8ss %8ss\n' "$1" "$2" "$3" "$4" "$5" "$6"
+  fi
+}
+
+phase_json() {
+  if [[ "$1" -lt $MIN_SAMPLES || "$3" == "-" ]]; then
+    printf '{"samples":%s,"errors":%s,"percentiles":null,"reason":"fewer than %s samples"}' "$1" "$2" "$MIN_SAMPLES"
+  else
+    printf '{"samples":%s,"errors":%s,"percentiles":{"p50":%s,"p90":%s,"p99":%s}}' "$1" "$2" "$3" "$4" "$5"
+  fi
+}
+
 echo "chaos: $CMD for ${SECS}s"
+
+# Baseline first, and only when probing: the comparison is worthless if the
+# "before" was measured while the fault was already applied.
+BASE_FILE="" FAULT_FILE=""
+if [[ -n "$PROBE" ]]; then
+  BASE_FILE="$(mktemp)" FAULT_FILE="$(mktemp)"
+  trap 'rm -f "$BASE_FILE" "$FAULT_FILE"' EXIT
+  echo "chaos: sampling baseline for $(to_seconds "$BASELINE")s"
+  sample_latency "$(to_seconds "$BASELINE")" "$BASE_FILE"
+fi
+
+# With a probe, the experiment runs in the background so the fault window can
+# be sampled while it is applied — sequencing them would measure recovery.
+run_experiment() {
 case "$CMD" in
   cpu) exec stress-ng --cpu "$WORKERS" --cpu-load "$LOAD" --timeout "${SECS}s" --metrics-brief ;;
   mem) exec stress-ng --vm "$WORKERS" --vm-bytes "$BYTES" --timeout "${SECS}s" --metrics-brief ;;
@@ -138,3 +271,16 @@ case "$CMD" in
   kill) run_kill ;;
   *) echo "chaos: unknown experiment '$CMD'" >&2; usage 64 ;;
 esac
+}
+
+if [[ -z "$PROBE" ]]; then
+  run_experiment
+else
+  run_experiment &
+  experiment_pid=$!
+  # Sample slightly inside the window so the last probe cannot land after the
+  # fault has been torn down and read as a recovered latency.
+  sample_latency $(( SECS > 2 ? SECS - 1 : SECS )) "$FAULT_FILE"
+  wait "$experiment_pid" || true
+  emit_report "$BASE_FILE" "$FAULT_FILE"
+fi
