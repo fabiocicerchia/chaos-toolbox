@@ -101,3 +101,28 @@ make release   # multi-arch buildx push
 
 `make test` needs a Docker daemon that allows `--cap-add NET_ADMIN`, since the
 cleanup assertion is the test worth having.
+
+## Degrading one dependency, not the whole host
+
+`delay`, `loss` and `limit` act on an interface, so by default they degrade
+everything the host talks to — including the metrics pipeline and the shell
+watching the experiment. `--to` narrows them to destination CIDRs:
+
+```sh
+chaos delay --duration 60s --ms 200 --to 10.0.3.0/24            # one dependency
+chaos loss  --duration 60s --pct 10 --to 10.0.3.7/32,10.0.4.0/24  # several
+```
+
+Repeat the flag or comma-separate. Traffic to anything else is untouched, which
+is what keeps the experiment observable while it runs.
+
+Under the hood this is a `prio` qdisc whose priomap sends **all** ordinary
+traffic to band 1:1 — the default map spreads packets across bands by TOS,
+which would drag some unmatched traffic through the impaired band by accident.
+Band 1:4 carries the netem/tbf qdisc and is reachable only through an explicit
+`u32` destination filter.
+
+Teardown is unchanged: deleting the root qdisc takes the whole tree with it,
+filters included, and the duration rail still applies. `test.sh` asserts both
+halves — that a gateway inside the CIDR is delayed, and that the same gateway
+is *not* delayed when the CIDR does not contain it.

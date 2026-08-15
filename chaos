@@ -5,15 +5,20 @@
 #   chaos cpu     --duration 60s [--workers 2] [--load 80]
 #   chaos mem     --duration 60s [--bytes 256M] [--workers 1]
 #   chaos io      --duration 60s [--workers 2]
-#   chaos delay   --duration 60s [--ms 200] [--jitter 50] [--dev eth0]
-#   chaos loss    --duration 60s [--pct 10] [--dev eth0]
-#   chaos limit   --duration 60s [--rate 1mbit] [--dev eth0]
+#   chaos delay   --duration 60s [--ms 200] [--jitter 50] [--dev eth0] [--to CIDR]
+#   chaos loss    --duration 60s [--pct 10] [--dev eth0] [--to CIDR]
+#   chaos limit   --duration 60s [--rate 1mbit] [--dev eth0] [--to CIDR]
 #   chaos kill    --duration 60s --target <pattern> [--every 20s]
 #                 [--mode docker|k8s] [--namespace ns] [--signal SIGKILL]
 #                 [--dry-run]
 #
 # Network experiments act on this container's netns — share the target pod's
 # network (sidecar / `kubectl debug --target`) and grant NET_ADMIN.
+#
+# Without --to they degrade the whole interface, which includes whatever is
+# watching the experiment. --to limits them to destination CIDRs (repeatable,
+# or comma-separated), so one dependency can be degraded while the rest of the
+# host's traffic — metrics, health checks, your shell — is untouched.
 #
 # `kill` restarts things repeatedly for the window, then stops. It needs
 # --target: there is no "everything" default, because the blast radius of a
@@ -26,6 +31,7 @@ usage() { grep '^#' "$0" | sed 's/^# \{0,1\}//'; exit "${1:-0}"; }
 CMD="${1:-}"; shift || true
 DURATION="" WORKERS=2 LOAD=80 BYTES=256M MS=200 JITTER=50 PCT=10 RATE=1mbit DEV=eth0
 TARGET="" EVERY=20s MODE="" NAMESPACE="" SIGNAL=SIGKILL DRY_RUN=0
+CIDRS=()
 while [[ $# -gt 0 ]]; do
   case "$1" in
     --duration) DURATION="$2"; shift 2 ;;
@@ -37,6 +43,7 @@ while [[ $# -gt 0 ]]; do
     --pct)      PCT="$2";      shift 2 ;;
     --rate)     RATE="$2";     shift 2 ;;
     --dev)      DEV="$2";      shift 2 ;;
+    --to)       IFS=',' read -ra _c <<< "$2"; CIDRS+=("${_c[@]}"); shift 2 ;;
     --target)   TARGET="$2";   shift 2 ;;
     --every)    EVERY="$2";    shift 2 ;;
     --mode)     MODE="$2";     shift 2 ;;
@@ -54,7 +61,41 @@ done
 to_seconds() { local d="$1"; case "$d" in *m) echo $(( ${d%m} * 60 ));; *s) echo "${d%s}";; *) echo "$d";; esac; }
 SECS="$(to_seconds "$DURATION")"
 
+# Deleting the root qdisc takes the whole tree with it — child qdiscs and
+# every filter — so one command cleans up both the scoped and unscoped shapes.
 netem_cleanup() { tc qdisc del dev "$DEV" root 2>/dev/null || true; echo "chaos: network rules cleaned up"; }
+
+# A CIDR reaches `tc` as a command argument, so it is validated rather than
+# trusted: dotted quad, optional /0-32, nothing else.
+valid_cidr() { [[ "$1" =~ ^([0-9]{1,3}\.){3}[0-9]{1,3}(/([0-9]|[12][0-9]|3[0-2]))?$ ]]; }
+
+# apply_netem <qdisc spec...> — install the experiment, scoped to --to when given.
+#
+# Unscoped it is the old one-liner: the spec becomes the root qdisc and every
+# packet leaving the interface goes through it.
+#
+# Scoped, it is a prio qdisc whose priomap sends ALL ordinary traffic to band
+# 1:1 — the default map spreads packets across bands by TOS, which would drag
+# some unmatched traffic through the impaired band by accident. Band 1:4 is
+# reachable only by an explicit u32 filter, so exactly the matched destinations
+# are degraded and nothing else is.
+apply_netem() {
+  if [[ ${#CIDRS[@]} -eq 0 ]]; then
+    tc qdisc add dev "$DEV" root "$@"
+    return
+  fi
+  for c in "${CIDRS[@]}"; do
+    valid_cidr "$c" || { echo "chaos: --to expects a CIDR like 10.0.0.0/24, got '$c'" >&2; exit 64; }
+  done
+  tc qdisc add dev "$DEV" root handle 1: prio bands 4 \
+    priomap 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
+  tc qdisc add dev "$DEV" parent 1:4 handle 40: "$@"
+  for c in "${CIDRS[@]}"; do
+    tc filter add dev "$DEV" protocol ip parent 1:0 prio 1 u32 \
+      match ip dst "$c" flowid 1:4
+    echo "chaos: scoped to $c"
+  done
+}
 
 # --- kill ------------------------------------------------------------------
 # Auto-detect the runtime rather than defaulting to one: guessing "docker" on a
@@ -125,15 +166,15 @@ case "$CMD" in
   io)  exec stress-ng --io "$WORKERS" --hdd 1 --timeout "${SECS}s" --metrics-brief ;;
   delay)
     trap netem_cleanup EXIT INT TERM
-    tc qdisc add dev "$DEV" root netem delay "${MS}ms" "${JITTER}ms"
+    apply_netem netem delay "${MS}ms" "${JITTER}ms"
     sleep "$SECS" ;;
   loss)
     trap netem_cleanup EXIT INT TERM
-    tc qdisc add dev "$DEV" root netem loss "${PCT}%"
+    apply_netem netem loss "${PCT}%"
     sleep "$SECS" ;;
   limit)
     trap netem_cleanup EXIT INT TERM
-    tc qdisc add dev "$DEV" root tbf rate "$RATE" burst 32kbit latency 400ms
+    apply_netem tbf rate "$RATE" burst 32kbit latency 400ms
     sleep "$SECS" ;;
   kill) run_kill ;;
   *) echo "chaos: unknown experiment '$CMD'" >&2; usage 64 ;;
