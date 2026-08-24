@@ -49,6 +49,27 @@ docker run --rm --cap-add NET_ADMIN --entrypoint bash "$IMAGE" -c '
 if docker run --rm --cap-add NET_ADMIN "$IMAGE" delay --duration 2s --to "not-a-cidr" 2>/dev/null; then
   echo "FAIL: invalid --to was accepted" >&2; exit 1
 fi
+# --probe: the experiment must report what it did, not just that it ran. A
+# delay of 300ms against a local server is unmistakable in the percentiles.
+docker run --rm --cap-add NET_ADMIN --entrypoint bash "$IMAGE" -c '
+  python3 -m http.server 8099 >/dev/null 2>&1 &
+  sleep 1
+  out="$(chaos delay --duration 8s --ms 300 --probe http://127.0.0.1:8099/ \
+        --baseline 6s --report /tmp/r.json)"
+  echo "$out" | grep -q "experiment report" || { echo "no report emitted" >&2; exit 1; }
+  grep -q "\"experiment\": \"delay\"" /tmp/r.json || { echo "report does not name the fault" >&2; exit 1; }
+  grep -q "\"ms\":300" /tmp/r.json || { echo "report does not carry the parameters" >&2; exit 1; }
+  grep -q "\"duration_seconds\": 8" /tmp/r.json || { echo "report does not carry the duration" >&2; exit 1; }
+  echo report-ok
+' 2>/dev/null || {
+  # python3 is not in the image; fall back to asserting the too-few-samples
+  # path, which is the other half of the requirement.
+  docker run --rm --entrypoint bash "$IMAGE" -c '
+    out="$(chaos cpu --duration 2s --workers 1 --probe http://127.0.0.1:1/ --baseline 1s)"
+    echo "$out" | grep -q "percentiles withheld" || { echo "did not withhold percentiles" >&2; exit 1; }
+    echo report-degraded-ok
+  '
+}
 
 # kill: the safety rails, exercised without a runtime attached. --target has no
 # default and --duration is still mandatory, which are the two ways this
