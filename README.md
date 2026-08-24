@@ -20,7 +20,7 @@ network rules are **removed automatically on exit** (including Ctrl-C).
 chaos cpu   --duration 60s [--workers 2] [--load 80]
 chaos mem   --duration 60s [--bytes 256M]
 chaos io    --duration 60s [--workers 2]
-chaos delay --duration 60s [--ms 200] [--jitter 50]
+chaos delay --duration 60s [--ms 200] [--jitter 50] [--probe URL]
 chaos loss  --duration 60s [--pct 10]
 chaos limit --duration 60s [--rate 1mbit]
 chaos kill  --duration 60s --target <pattern> [--every 20s]

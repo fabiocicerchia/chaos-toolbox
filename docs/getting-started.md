@@ -101,3 +101,44 @@ make release   # multi-arch buildx push
 
 `make test` needs a Docker daemon that allows `--cap-add NET_ADMIN`, since the
 cleanup assertion is the test worth having.
+
+## Proving what the experiment did
+
+Without a probe an experiment proves it ran, not what it did — which is not
+evidence anyone can take to a review. `--probe` samples latency against a
+target before injection and again during it:
+
+```sh
+chaos delay --duration 60s --ms 300 \
+  --probe http://checkout.internal/health \
+  --baseline 30s --report experiment.json
+```
+
+```
+chaos: experiment report — delay for 60s against http://checkout.internal/health
+  phase      samples  errors       p50       p90       p99
+  baseline        30       0   0.0121s   0.0180s   0.0233s
+  fault           59       2   0.3140s   0.3302s   0.3511s
+  report written to experiment.json
+```
+
+The JSON carries the same figures plus the fault, its parameters and its
+duration, so a report says what was done as well as what happened.
+
+Three choices worth knowing:
+
+**The baseline is sampled first, on its own.** A "before" measured while the
+fault was already applied is not a before. The fault window is then sampled
+*while* the experiment runs, ending a second early so the last probe cannot
+land after teardown and read as a recovery.
+
+**Too few samples withholds the percentiles** rather than printing them. A p99
+from three requests is a number people quote. Lengthen `--duration` or
+`--baseline`, or shorten `--probe-interval`.
+
+**Errors are counted, not timed.** A request that failed has no latency worth
+putting in a percentile, so it moves the error column instead of the p99.
+
+The probe is one GET per interval, not a load generator: the point is to
+observe the path a real client takes while the fault is applied, and a tool
+that saturated the target would be measuring itself.
