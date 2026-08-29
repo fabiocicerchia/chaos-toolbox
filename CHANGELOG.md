@@ -5,6 +5,13 @@ All notable changes to this project are documented here.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.2.1](https://github.com/fabiocicerchia/chaos-toolbox/compare/v1.2.0...v1.2.1) (2026-08-29)
+
+
+### Bug Fixes
+
+* unblock quality and clear the Scorecard pinned-dependencies finding ([#37](https://github.com/fabiocicerchia/chaos-toolbox/issues/37)) ([1c5b998](https://github.com/fabiocicerchia/chaos-toolbox/commit/1c5b998cc760411c5db77b559828a04303129623))
+
 ## [1.2.0](https://github.com/fabiocicerchia/chaos-toolbox/compare/v1.1.0...v1.2.0) (2026-08-25)
 
 
