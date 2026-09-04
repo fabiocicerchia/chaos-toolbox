@@ -5,6 +5,13 @@ All notable changes to this project are documented here.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.2.2](https://github.com/fabiocicerchia/chaos-toolbox/compare/v1.2.1...v1.2.2) (2026-09-04)
+
+
+### Bug Fixes
+
+* **ci:** pin the editorconfig-checker binary version ([#43](https://github.com/fabiocicerchia/chaos-toolbox/issues/43)) ([b35c3a6](https://github.com/fabiocicerchia/chaos-toolbox/commit/b35c3a60e56e627f807bbd88383464755573fb4d))
+
 ## [1.2.1](https://github.com/fabiocicerchia/chaos-toolbox/compare/v1.2.0...v1.2.1) (2026-08-29)
 
 
