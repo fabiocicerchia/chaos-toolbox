@@ -126,6 +126,7 @@ Teardown is unchanged: deleting the root qdisc takes the whole tree with it,
 filters included, and the duration rail still applies. `test.sh` asserts both
 halves — that a gateway inside the CIDR is delayed, and that the same gateway
 is *not* delayed when the CIDR does not contain it.
+
 ## Proving what the experiment did
 
 Without a probe an experiment proves it ran, not what it did — which is not
@@ -138,7 +139,7 @@ chaos delay --duration 60s --ms 300 \
   --baseline 30s --report experiment.json
 ```
 
-```
+```text
 chaos: experiment report — delay for 60s against http://checkout.internal/health
   phase      samples  errors       p50       p90       p99
   baseline        30       0   0.0121s   0.0180s   0.0233s
