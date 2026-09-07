@@ -4,7 +4,7 @@ One Alpine image, one bash script, no daemon and no control plane. That is the
 whole design, and it is the point: a chaos experiment you cannot fully read in
 one sitting is one you will not run against production.
 
-```
+```text
 chaos <experiment> --duration Nn
         │
         ├── cpu / mem / io  ──► stress-ng   (this container's cgroup)
@@ -50,11 +50,11 @@ mid-experiment the qdisc survives it; remove it with
 container's network namespace**. That namespace is shared only when you ask for
 it:
 
-| How it is run | Whose network is affected |
-|---|---|
-| `kubectl debug --target=app` | the pod's — containers in a pod share one netns |
-| `docker run --network container:app` | that container's |
-| `docker run` (plain) | its own, and nothing else — an experiment that measures nothing |
+| How it is run                        | Whose network is affected                                       |
+| ------------------------------------ | --------------------------------------------------------------- |
+| `kubectl debug --target=app`         | the pod's — containers in a pod share one netns                 |
+| `docker run --network container:app` | that container's                                                |
+| `docker run` (plain)                 | its own, and nothing else — an experiment that measures nothing |
 
 `NET_ADMIN` is required for the `tc` calls and only for those; the stress
 experiments need no capabilities at all.
@@ -63,10 +63,10 @@ experiments need no capabilities at all.
 
 1. A `case` arm in `chaos`, plus its flags in the `while` parser and the
    defaults line.
-2. Its usage line in the header comment — `usage()` prints that comment block,
+1. Its usage line in the header comment — `usage()` prints that comment block,
    so the help text cannot drift from the script.
-3. If it changes kernel state rather than just this process, it belongs in the
+1. If it changes kernel state rather than just this process, it belongs in the
    trapped branch, not the `exec` branch. That is the only structural decision
    in the script, and getting it wrong leaves rules behind on someone's pod.
-4. A case in `test.sh`; for a network experiment, an assertion that it cleans
+1. A case in `test.sh`; for a network experiment, an assertion that it cleans
    up, not just that it applied.
