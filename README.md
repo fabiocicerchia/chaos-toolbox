@@ -56,8 +56,8 @@ k8s mode needs a service account that can `list` and `delete` pods.
 ## Install
 
 ```sh
-make build                       # builds ghcr.io/fabiocicerchia/chaos-toolbox:1.0.0 locally
-docker pull ghcr.io/fabiocicerchia/chaos-toolbox:1.0.0
+make build                       # builds the image locally, tagged from version.txt
+docker pull ghcr.io/fabiocicerchia/chaos-toolbox:latest      # or pin a release: :1.2.2
 ```
 
 ## Usage
