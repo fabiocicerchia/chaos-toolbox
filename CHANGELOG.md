@@ -5,6 +5,18 @@ All notable changes to this project are documented here.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.3.0](https://github.com/fabiocicerchia/chaos-toolbox/compare/v1.2.2...v1.3.0) (2026-09-08)
+
+
+### Features
+
+* add the eight-verb repo contract ([#52](https://github.com/fabiocicerchia/chaos-toolbox/issues/52)) ([1d276cf](https://github.com/fabiocicerchia/chaos-toolbox/commit/1d276cf050fde42441d16fcd130400f6593c689b))
+
+
+### Bug Fixes
+
+* point install docs at an image tag that exists ([#55](https://github.com/fabiocicerchia/chaos-toolbox/issues/55)) ([9b8904f](https://github.com/fabiocicerchia/chaos-toolbox/commit/9b8904f9ab7106ab16ee3e682c771df5e1d11867))
+
 ## [1.2.2](https://github.com/fabiocicerchia/chaos-toolbox/compare/v1.2.1...v1.2.2) (2026-09-04)
 
 ### Bug Fixes
