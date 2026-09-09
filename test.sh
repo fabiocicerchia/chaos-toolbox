@@ -8,7 +8,7 @@ if docker run --rm "$IMAGE" cpu 2>/dev/null; then
 fi
 docker run --rm "$IMAGE" cpu --duration 2s --workers 1 >/dev/null
 docker run --rm --cap-add NET_ADMIN --entrypoint bash "$IMAGE" -c '
-  chaos delay --duration 2s --ms 100 &
+  chaosbox delay --duration 2s --ms 100 &
   sleep 1
   tc qdisc show dev eth0 | grep -q netem || { echo "netem not applied" >&2; exit 1; }
   wait
@@ -25,7 +25,7 @@ docker run --rm --cap-add NET_ADMIN --entrypoint bash "$IMAGE" -c '
 
   base="$(rtt "$gw")"
 
-  chaos delay --duration 6s --ms 300 --to "$gw/32" &
+  chaosbox delay --duration 6s --ms 300 --to "$gw/32" &
   sleep 1
   tc qdisc show dev eth0 | grep -q prio || { echo "scoped run did not build a prio tree" >&2; exit 1; }
   tc filter show dev eth0 | grep -q "flowid 1:4" || { echo "no u32 filter installed" >&2; exit 1; }
@@ -35,7 +35,7 @@ docker run --rm --cap-add NET_ADMIN --entrypoint bash "$IMAGE" -c '
     echo "in-scope traffic was not delayed (base ${base}ms, scoped ${inside}ms)" >&2; exit 1; }
 
   # Same experiment, a CIDR the gateway is not in: it must be untouched.
-  chaos delay --duration 6s --ms 300 --to 203.0.113.0/24 &
+  chaosbox delay --duration 6s --ms 300 --to 203.0.113.0/24 &
   sleep 1
   outside="$(rtt "$gw")"
   wait
@@ -54,7 +54,7 @@ fi
 docker run --rm --cap-add NET_ADMIN --entrypoint bash "$IMAGE" -c '
   python3 -m http.server 8099 >/dev/null 2>&1 &
   sleep 1
-  out="$(chaos delay --duration 8s --ms 300 --probe http://127.0.0.1:8099/ \
+  out="$(chaosbox delay --duration 8s --ms 300 --probe http://127.0.0.1:8099/ \
         --baseline 6s --report /tmp/r.json)"
   echo "$out" | grep -q "experiment report" || { echo "no report emitted" >&2; exit 1; }
   grep -q "\"experiment\": \"delay\"" /tmp/r.json || { echo "report does not name the fault" >&2; exit 1; }
@@ -65,7 +65,7 @@ docker run --rm --cap-add NET_ADMIN --entrypoint bash "$IMAGE" -c '
   # python3 is not in the image; fall back to asserting the too-few-samples
   # path, which is the other half of the requirement.
   docker run --rm --entrypoint bash "$IMAGE" -c '
-    out="$(chaos cpu --duration 2s --workers 1 --probe http://127.0.0.1:1/ --baseline 1s)"
+    out="$(chaosbox cpu --duration 2s --workers 1 --probe http://127.0.0.1:1/ --baseline 1s)"
     echo "$out" | grep -q "percentiles withheld" || { echo "did not withhold percentiles" >&2; exit 1; }
     echo report-degraded-ok
   '
@@ -86,7 +86,7 @@ docker run --rm --entrypoint bash "$IMAGE" -c '
 [[ "$1" == "get" ]] && printf "pod/web-1\n"
 SH
   chmod +x /usr/local/bin/kubectl
-  out="$(chaos kill --duration 2s --every 1s --mode k8s --target app=web --dry-run)"
+  out="$(chaosbox kill --duration 2s --every 1s --mode k8s --target app=web --dry-run)"
   echo "$out" | grep -q "would kill pod/web-1" || { echo "dry-run did not resolve targets" >&2; exit 1; }
   echo "$out" | grep -q "0 kill(s)" || { echo "dry-run killed something" >&2; exit 1; }
   echo kill-ok

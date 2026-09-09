@@ -28,14 +28,14 @@ setup: ## Install the pre-commit hook
 
 install: ## Install the tools and their man pages (DESTDIR/PREFIX honoured)
 	install -d "$(DESTDIR)$(PREFIX)/bin" "$(DESTDIR)$(PREFIX)/share/man/man1"
-	install -m 0755 chaos "$(DESTDIR)$(PREFIX)/bin/chaos"
-	install -m 0644 man/chaos.1 "$(DESTDIR)$(PREFIX)/share/man/man1/chaos.1"
-	@echo "installed chaos into $(DESTDIR)$(PREFIX)/bin"
+	install -m 0755 chaosbox "$(DESTDIR)$(PREFIX)/bin/chaosbox"
+	install -m 0644 man/chaosbox.1 "$(DESTDIR)$(PREFIX)/share/man/man1/chaosbox.1"
+	@echo "installed chaosbox into $(DESTDIR)$(PREFIX)/bin"
 
 uninstall: ## Remove what `make install` put down
-	rm -f "$(DESTDIR)$(PREFIX)/bin/chaos" "$(DESTDIR)$(PREFIX)/share/man/man1/chaos.1"
+	rm -f "$(DESTDIR)$(PREFIX)/bin/chaosbox" "$(DESTDIR)$(PREFIX)/share/man/man1/chaosbox.1"
 
-run: build ## Run chaos from the image (ARGS are its arguments)
+run: build ## Run chaosbox from the image (ARGS are its arguments)
 	docker run --rm $(IMAGE):$(VERSION) $(ARGS)
 
 format: ## Rewrite what the gate can fix: whitespace, line endings, final newline

@@ -1,6 +1,6 @@
-.TH CHAOS 1 "2026-09" "chaos-toolbox" "User Commands"
+.TH CHAOSBOX 1 "2026-09" "chaos-toolbox" "User Commands"
 .SH NAME
-chaos \- small, time-boxed chaos experiments
+chaosbox \- small, time-boxed chaos experiments
 .SH SYNOPSIS
 .B chaos
 .I experiment
@@ -177,13 +177,13 @@ Usage error: an unknown flag, or a missing
 Saturate two cores for a minute, and measure what it did to an endpoint:
 .PP
 .RS
-.B chaos cpu \-\-duration 60s \-\-load 90 \-\-probe http://localhost:8080/healthz
+.B chaosbox cpu \-\-duration 60s \-\-load 90 \-\-probe http://localhost:8080/healthz
 .RE
 .PP
 Add latency to one dependency only, leaving the rest of the host alone:
 .PP
 .RS
-.B chaos delay \-\-duration 2m \-\-ms 300 \-\-to 10.0.4.0/24
+.B chaosbox delay \-\-duration 2m \-\-ms 300 \-\-to 10.0.4.0/24
 .RE
 .SH SEE ALSO
 .BR tc (8),
