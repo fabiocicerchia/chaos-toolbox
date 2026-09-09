@@ -1,0 +1,192 @@
+.TH CHAOS 1 "2026-09" "chaos-toolbox" "User Commands"
+.SH NAME
+chaos \- small, time-boxed chaos experiments
+.SH SYNOPSIS
+.B chaos
+.I experiment
+.B \-\-duration
+.I TIME
+.RI [ options ]
+.SH DESCRIPTION
+Runs one small chaos experiment against this machine or container and
+cleans up after itself: network rules are removed on exit.
+.PP
+Every experiment requires
+.BR \-\-duration .
+There is no open-ended mode, because an experiment nobody remembered to
+stop is an outage.
+.PP
+Network experiments act on this container's network namespace. Share the
+target pod's network (as a sidecar, or with
+.BR "kubectl debug \-\-target" )
+and grant CAP_NET_ADMIN.
+.PP
+Without
+.B \-\-to
+the network experiments degrade the whole interface, which includes
+whatever is watching the experiment.
+.B \-\-to
+limits them to destination CIDRs, so one dependency can be degraded while
+the rest of the host's traffic \(em metrics, health checks, your shell \(em
+is untouched.
+.SH COMMANDS
+.TP
+.BI cpu " \-\-duration TIME"
+Burn CPU on
+.I \-\-workers
+workers at
+.I \-\-load
+percent.
+.TP
+.BI mem " \-\-duration TIME"
+Hold
+.I \-\-bytes
+of memory on
+.I \-\-workers
+workers.
+.TP
+.BI io " \-\-duration TIME"
+Generate disk I/O on
+.I \-\-workers
+workers.
+.TP
+.BI delay " \-\-duration TIME"
+Add
+.I \-\-ms
+latency with
+.I \-\-jitter
+to the interface.
+.TP
+.BI loss " \-\-duration TIME"
+Drop
+.I \-\-pct
+percent of packets.
+.TP
+.BI limit " \-\-duration TIME"
+Shape the interface down to
+.IR \-\-rate .
+.TP
+.BI kill " \-\-duration TIME \-\-target PATTERN"
+Restart matching workloads every
+.IR \-\-every ,
+for the window, then stop. There is no "everything" default: the blast
+radius of a typo should be one workload, not a cluster.
+.SH OPTIONS
+.SS Common
+.TP
+.BI \-\-duration " TIME"
+How long the experiment runs, e.g.
+.BR 60s ,
+.BR 5m .
+Required \(em it is the safety rail.
+.TP
+.BI \-\-workers " N"
+Worker processes (default 2).
+.TP
+.BI \-\-probe " URL"
+Turn the experiment into an experiment
+.IR report :
+latency is sampled against URL before injection and again during it, and
+the two sets of percentiles are printed. Without it, an experiment
+proves that it ran, not what it did.
+.TP
+.BI \-\-report " FILE"
+Write the probe's before/after percentiles to FILE as JSON.
+.TP
+.BI \-\-baseline " TIME"
+How long to sample before injecting (default 10s).
+.TP
+.BI \-\-probe\-interval " SEC"
+Seconds between probe samples (default 1).
+.SS Resource experiments
+.TP
+.BI \-\-load " PCT"
+CPU load percentage for
+.B cpu
+(default 80).
+.TP
+.BI \-\-bytes " SIZE"
+Memory held by
+.B mem
+(default 256M).
+.SS Network experiments
+.TP
+.BI \-\-ms " MS"
+Added latency for
+.B delay
+(default 200).
+.TP
+.BI \-\-jitter " MS"
+Jitter around
+.B \-\-ms
+(default 50).
+.TP
+.BI \-\-pct " PCT"
+Packet loss percentage for
+.B loss
+(default 10).
+.TP
+.BI \-\-rate " RATE"
+Bandwidth ceiling for
+.B limit
+(default 1mbit).
+.TP
+.BI \-\-dev " IFACE"
+Interface to act on (default eth0).
+.TP
+.BI \-\-to " CIDR"
+Restrict the experiment to these destination CIDRs. Repeatable, or
+comma-separated. Strongly recommended: without it the whole interface
+is degraded.
+.SS Restart experiment
+.TP
+.BI \-\-target " PATTERN"
+What
+.B kill
+restarts. Required for that experiment.
+.TP
+.BI \-\-every " TIME"
+Interval between restarts (default 20s).
+.TP
+.BI \-\-mode " docker|k8s"
+Where to restart. Docker mode needs the socket mounted; k8s mode needs a
+kubeconfig or service account that can delete pods.
+.TP
+.BI \-\-namespace " NS"
+Namespace for
+.BR "\-\-mode k8s" .
+.TP
+.BI \-\-signal " SIG"
+Signal to send (default SIGKILL).
+.TP
+.B \-\-dry\-run
+Print what would be restarted, and restart nothing.
+.TP
+.BR \-h ", " \-\-help
+Print the built-in help.
+.SH EXIT STATUS
+.TP
+.B 0
+The experiment ran and cleaned up.
+.TP
+.B 64
+Usage error: an unknown flag, or a missing
+.BR \-\-duration .
+.SH EXAMPLES
+.PP
+Saturate two cores for a minute, and measure what it did to an endpoint:
+.PP
+.RS
+.B chaos cpu \-\-duration 60s \-\-load 90 \-\-probe http://localhost:8080/healthz
+.RE
+.PP
+Add latency to one dependency only, leaving the rest of the host alone:
+.PP
+.RS
+.B chaos delay \-\-duration 2m \-\-ms 300 \-\-to 10.0.4.0/24
+.RE
+.SH SEE ALSO
+.BR tc (8),
+.BR netem (8).
+Project documentation:
+https://github.com/fabiocicerchia/chaos-toolbox

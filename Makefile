@@ -6,7 +6,7 @@ PLATFORMS ?= linux/amd64,linux/arm64
 # FC-GEN-057: the same eight verbs in every repo, each either wired or a
 # declared no-op that says why. None of them exit 0 quietly.
 
-.PHONY: help setup install build test lint run format analyze push release
+.PHONY: help setup install uninstall build test lint run format analyze push release
 
 .DEFAULT_GOAL := help
 
@@ -26,8 +26,14 @@ test: build ## Build, then run the smoke tests
 setup: ## Install the pre-commit hook
 	pre-commit install
 
-install: ## Pull the published image onto this machine
-	docker pull $(IMAGE):$(VERSION)
+install: ## Install the tools and their man pages (DESTDIR/PREFIX honoured)
+	install -d "$(DESTDIR)$(PREFIX)/bin" "$(DESTDIR)$(PREFIX)/share/man/man1"
+	install -m 0755 chaos "$(DESTDIR)$(PREFIX)/bin/chaos"
+	install -m 0644 man/chaos.1 "$(DESTDIR)$(PREFIX)/share/man/man1/chaos.1"
+	@echo "installed chaos into $(DESTDIR)$(PREFIX)/bin"
+
+uninstall: ## Remove what `make install` put down
+	rm -f "$(DESTDIR)$(PREFIX)/bin/chaos" "$(DESTDIR)$(PREFIX)/share/man/man1/chaos.1"
 
 run: build ## Run chaos from the image (ARGS are its arguments)
 	docker run --rm $(IMAGE):$(VERSION) $(ARGS)
