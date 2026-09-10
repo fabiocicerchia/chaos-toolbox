@@ -5,6 +5,18 @@ All notable changes to this project are documented here.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.4.0](https://github.com/fabiocicerchia/chaos-toolbox/compare/v1.3.0...v1.4.0) (2026-09-10)
+
+
+### Features
+
+* **packaging:** man page, and an install that stages rather than pulls ([#58](https://github.com/fabiocicerchia/chaos-toolbox/issues/58)) ([b0f285e](https://github.com/fabiocicerchia/chaos-toolbox/commit/b0f285ef8507675e17f1f1153b73674a2917ceb9))
+
+
+### Bug Fixes
+
+* **release:** grant id-token on the job that calls the signing workflow ([#62](https://github.com/fabiocicerchia/chaos-toolbox/issues/62)) ([9ec1d53](https://github.com/fabiocicerchia/chaos-toolbox/commit/9ec1d537eee5384ae5befe6428336e45f6aa311b))
+
 ## [1.3.0](https://github.com/fabiocicerchia/chaos-toolbox/compare/v1.2.2...v1.3.0) (2026-09-08)
 
 
