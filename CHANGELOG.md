@@ -5,6 +5,13 @@ All notable changes to this project are documented here.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.0.1](https://github.com/fabiocicerchia/chaos-toolbox/compare/v2.0.0...v2.0.1) (2026-09-10)
+
+
+### Bug Fixes
+
+* **coc:** restore the reporting address and the version deep-link ([#66](https://github.com/fabiocicerchia/chaos-toolbox/issues/66)) ([98efe3a](https://github.com/fabiocicerchia/chaos-toolbox/commit/98efe3ad452b6e9ac7b1099f32b57a3f1c0518bd))
+
 ## [2.0.0](https://github.com/fabiocicerchia/chaos-toolbox/compare/v1.4.0...v2.0.0) (2026-09-10)
 
 
