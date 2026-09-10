@@ -32,8 +32,8 @@ docker compose -f compose.yaml exec chaosbox tc qdisc show dev eth0
 ```
 
 After it exits, latency is back to baseline and the qdisc is gone — the
-`trap ... EXIT` in `chaosbox` removes it whether the run finished, was stopped, or
-was interrupted.
+`trap ... EXIT` in `chaosbox` removes it whether the run finished, was
+stopped, or was interrupted.
 
 ```sh
 curl -o /dev/null -s -w 'after:   %{time_total}s\n' http://localhost:8080/
@@ -47,7 +47,8 @@ docker compose -f compose.yaml down
 docker compose -f compose.yaml run --rm chaosbox loss --duration 30s --pct 10
 
 # throttle to 1 mbit
-docker compose -f compose.yaml run --rm chaosbox limit --duration 30s --rate 1mbit
+docker compose -f compose.yaml run --rm chaosbox \
+  limit --duration 30s --rate 1mbit
 ```
 
 Note that `cpu`, `mem` and `io` will *not* do anything useful here: Compose

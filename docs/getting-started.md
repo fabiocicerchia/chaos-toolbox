@@ -63,7 +63,8 @@ container; without it the `tc` call fails with `Operation not permitted`.
 
 If the interface is not `eth0` — multus, a second NIC, a host-network pod —
 pass `--dev`. Check first with
-`kubectl debug ... -- chaosbox --help` and `ip -brief link` from inside the netns.
+`kubectl debug ... -- chaosbox --help` and `ip -brief link` from inside the
+netns.
 
 ## Confirm the cleanup happened
 
@@ -109,7 +110,7 @@ everything the host talks to — including the metrics pipeline and the shell
 watching the experiment. `--to` narrows them to destination CIDRs:
 
 ```sh
-chaosbox delay --duration 60s --ms 200 --to 10.0.3.0/24            # one dependency
+chaosbox delay --duration 60s --ms 200 --to 10.0.3.0/24   # one dependency
 chaosbox loss  --duration 60s --pct 10 --to 10.0.3.7/32,10.0.4.0/24  # several
 ```
 
@@ -140,7 +141,7 @@ chaosbox delay --duration 60s --ms 300 \
 ```
 
 ```text
-chaosbox: experiment report — delay for 60s against http://checkout.internal/health
+chaosbox: experiment report — delay for 60s against http://checkout/health
   phase      samples  errors       p50       p90       p99
   baseline        30       0   0.0121s   0.0180s   0.0233s
   fault           59       2   0.3140s   0.3302s   0.3511s

@@ -116,7 +116,7 @@ verbs, so you do not have to read a Makefile to find out how to build or test it
 | `build`   | Build the image locally                                 |
 | `test`    | Build, then run the smoke tests                         |
 | `lint`    | `pre-commit run --all-files` — the whole gate           |
-| `run`     | Run `chaosbox` from the image; `ARGS` are its arguments    |
+| `run`     | Run `chaosbox` from the image; `ARGS` are its arguments |
 | `format`  | Rewrite what the gate can fix: whitespace, endings, EOF |
 | `analyze` | `trivy fs` — the same scan CI runs                      |
 
