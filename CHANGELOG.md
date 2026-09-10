@@ -5,6 +5,17 @@ All notable changes to this project are documented here.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.0.0](https://github.com/fabiocicerchia/chaos-toolbox/compare/v1.4.0...v2.0.0) (2026-09-10)
+
+
+### ⚠ BREAKING CHANGES
+
+* the command is now `chaosbox`. The image entrypoint, the compose service in examples/, and every `chaos <experiment>` invocation are now `chaosbox`. Prose about chaos experiments is unchanged — only the command was renamed.
+
+### Code Refactoring
+
+* rename the `chaos` command to `chaosbox` ([#59](https://github.com/fabiocicerchia/chaos-toolbox/issues/59)) ([3f74c89](https://github.com/fabiocicerchia/chaos-toolbox/commit/3f74c8986d095658dee6d7c5b3387037f78c35ce))
+
 ## [1.4.0](https://github.com/fabiocicerchia/chaos-toolbox/compare/v1.3.0...v1.4.0) (2026-09-10)
 
 
