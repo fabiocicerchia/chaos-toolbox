@@ -2,13 +2,13 @@
 # chaos — small, time-boxed chaos experiments. Every experiment REQUIRES
 # --duration and cleans up after itself (network rules removed on exit).
 #
-#   chaos cpu     --duration 60s [--workers 2] [--load 80]
-#   chaos mem     --duration 60s [--bytes 256M] [--workers 1]
-#   chaos io      --duration 60s [--workers 2]
-#   chaos delay   --duration 60s [--ms 200] [--jitter 50] [--dev eth0] [--to CIDR]
-#   chaos loss    --duration 60s [--pct 10] [--dev eth0] [--to CIDR]
-#   chaos limit   --duration 60s [--rate 1mbit] [--dev eth0] [--to CIDR]
-#   chaos kill    --duration 60s --target <pattern> [--every 20s]
+#   chaosbox cpu     --duration 60s [--workers 2] [--load 80]
+#   chaosbox mem     --duration 60s [--bytes 256M] [--workers 1]
+#   chaosbox io      --duration 60s [--workers 2]
+#   chaosbox delay   --duration 60s [--ms 200] [--jitter 50] [--dev eth0] [--to CIDR]
+#   chaosbox loss    --duration 60s [--pct 10] [--dev eth0] [--to CIDR]
+#   chaosbox limit   --duration 60s [--rate 1mbit] [--dev eth0] [--to CIDR]
+#   chaosbox kill    --duration 60s --target <pattern> [--every 20s]
 #                 [--mode docker|k8s] [--namespace ns] [--signal SIGKILL]
 #                 [--dry-run]
 #
@@ -62,19 +62,19 @@ while [[ $# -gt 0 ]]; do
     --baseline) BASELINE="$2"; shift 2 ;;
     --probe-interval) PROBE_INTERVAL="$2"; shift 2 ;;
     --help|-h)  usage ;;
-    *) echo "chaos: unknown flag $1" >&2; usage 64 ;;
+    *) echo "chaosbox: unknown flag $1" >&2; usage 64 ;;
   esac
 done
 
 [[ -n "$CMD" && "$CMD" != "--help" && "$CMD" != "-h" ]] || usage
-[[ -n "$DURATION" ]] || { echo "chaos: --duration is required (safety rail)" >&2; exit 64; }
+[[ -n "$DURATION" ]] || { echo "chaosbox: --duration is required (safety rail)" >&2; exit 64; }
 
 to_seconds() { local d="$1"; case "$d" in *m) echo $(( ${d%m} * 60 ));; *s) echo "${d%s}";; *) echo "$d";; esac; }
 SECS="$(to_seconds "$DURATION")"
 
 # Deleting the root qdisc takes the whole tree with it — child qdiscs and
 # every filter — so one command cleans up both the scoped and unscoped shapes.
-netem_cleanup() { tc qdisc del dev "$DEV" root 2>/dev/null || true; echo "chaos: network rules cleaned up"; }
+netem_cleanup() { tc qdisc del dev "$DEV" root 2>/dev/null || true; echo "chaosbox: network rules cleaned up"; }
 
 # A CIDR reaches `tc` as a command argument, so it is validated rather than
 # trusted: dotted quad, optional /0-32, nothing else.
@@ -96,7 +96,7 @@ apply_netem() {
     return
   fi
   for c in "${CIDRS[@]}"; do
-    valid_cidr "$c" || { echo "chaos: --to expects a CIDR like 10.0.0.0/24, got '$c'" >&2; exit 64; }
+    valid_cidr "$c" || { echo "chaosbox: --to expects a CIDR like 10.0.0.0/24, got '$c'" >&2; exit 64; }
   done
   tc qdisc add dev "$DEV" root handle 1: prio bands 4 \
     priomap 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
@@ -104,7 +104,7 @@ apply_netem() {
   for c in "${CIDRS[@]}"; do
     tc filter add dev "$DEV" protocol ip parent 1:0 prio 1 u32 \
       match ip dst "$c" flowid 1:4
-    echo "chaos: scoped to $c"
+    echo "chaosbox: scoped to $c"
   done
 }
 
@@ -117,7 +117,7 @@ detect_mode() {
   if [[ -n "${KUBERNETES_SERVICE_HOST:-}" ]] || command -v kubectl >/dev/null 2>&1; then
     echo k8s; return
   fi
-  echo "chaos: cannot tell docker from k8s — pass --mode" >&2; exit 64
+  echo "chaosbox: cannot tell docker from k8s — pass --mode" >&2; exit 64
 }
 
 kill_targets_docker() {
@@ -139,25 +139,25 @@ kill_one_docker() { docker kill --signal="$SIGNAL" "$1" >/dev/null; }
 kill_one_k8s() { kubectl delete "$1" ${NAMESPACE:+-n "$NAMESPACE"} --wait=false >/dev/null; }
 
 run_kill() {
-  [[ -n "$TARGET" ]] || { echo "chaos: kill requires --target (no default: a typo must not take out a cluster)" >&2; exit 64; }
+  [[ -n "$TARGET" ]] || { echo "chaosbox: kill requires --target (no default: a typo must not take out a cluster)" >&2; exit 64; }
   [[ -n "$MODE" ]] || MODE="$(detect_mode)"
   local every killed=0 deadline
   every="$(to_seconds "$EVERY")"
   deadline=$(( $(date +%s) + SECS ))
-  echo "chaos: kill mode=$MODE target='$TARGET' every=${every}s$( ((DRY_RUN)) && echo ' (dry run)')"
+  echo "chaosbox: kill mode=$MODE target='$TARGET' every=${every}s$( ((DRY_RUN)) && echo ' (dry run)')"
   while [[ $(date +%s) -lt $deadline ]]; do
     local targets
     targets="$("kill_targets_$MODE")"
     if [[ -z "$targets" ]]; then
-      echo "chaos: no targets matched '$TARGET'"
+      echo "chaosbox: no targets matched '$TARGET'"
     else
       while IFS= read -r t; do
         [[ -n "$t" ]] || continue
         if ((DRY_RUN)); then
-          echo "chaos: would kill $t"
+          echo "chaosbox: would kill $t"
         else
-          echo "chaos: killing $t"
-          "kill_one_$MODE" "$t" || echo "chaos: kill failed for $t (already gone?)"
+          echo "chaosbox: killing $t"
+          "kill_one_$MODE" "$t" || echo "chaosbox: kill failed for $t (already gone?)"
           killed=$((killed + 1))
         fi
       done <<< "$targets"
@@ -167,7 +167,7 @@ run_kill() {
     (( remaining <= 0 )) && break
     sleep "$(( every < remaining ? every : remaining ))"
   done
-  echo "chaos: kill finished — $killed kill(s) over ${SECS}s"
+  echo "chaosbox: kill finished — $killed kill(s) over ${SECS}s"
 }
 
 
@@ -235,7 +235,7 @@ emit_report() {
   esac
 
   echo
-  echo "chaos: experiment report — $CMD for ${SECS}s against $PROBE"
+  echo "chaosbox: experiment report — $CMD for ${SECS}s against $PROBE"
   printf '  %-10s %7s %7s %9s %9s %9s\n' phase samples errors p50 p90 p99
   report_row baseline "$b_n" "$b_err" "$b_p50" "$b_p90" "$b_p99"
   report_row fault    "$d_n" "$d_err" "$d_p50" "$d_p90" "$d_p99"
@@ -277,7 +277,7 @@ phase_json() {
   fi
 }
 
-echo "chaos: $CMD for ${SECS}s"
+echo "chaosbox: $CMD for ${SECS}s"
 
 # Baseline first, and only when probing: the comparison is worthless if the
 # "before" was measured while the fault was already applied.
@@ -285,7 +285,7 @@ BASE_FILE="" FAULT_FILE=""
 if [[ -n "$PROBE" ]]; then
   BASE_FILE="$(mktemp)" FAULT_FILE="$(mktemp)"
   trap 'rm -f "$BASE_FILE" "$FAULT_FILE"' EXIT
-  echo "chaos: sampling baseline for $(to_seconds "$BASELINE")s"
+  echo "chaosbox: sampling baseline for $(to_seconds "$BASELINE")s"
   sample_latency "$(to_seconds "$BASELINE")" "$BASE_FILE"
 fi
 
@@ -309,7 +309,7 @@ case "$CMD" in
     apply_netem tbf rate "$RATE" burst 32kbit latency 400ms
     sleep "$SECS" ;;
   kill) run_kill ;;
-  *) echo "chaos: unknown experiment '$CMD'" >&2; usage 64 ;;
+  *) echo "chaosbox: unknown experiment '$CMD'" >&2; usage 64 ;;
 esac
 }
 

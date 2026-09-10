@@ -7,7 +7,7 @@ LABEL org.opencontainers.image.title="chaos-toolbox" \
       org.opencontainers.image.source="https://github.com/fabiocicerchia/chaos-toolbox"
 ARG KUBECTL_VERSION=1.33.2
 RUN apk add --no-cache bash stress-ng iproute2 iputils curl docker-cli
-# `chaos kill` in k8s mode. Pinned rather than :latest so an experiment run
+# `chaosbox kill` in k8s mode. Pinned rather than :latest so an experiment run
 # next month talks to the same client it was tested against. # VERSION-BUMP
 RUN ARCH="$(uname -m)" \
  && case "$ARCH" in x86_64) ARCH=amd64 ;; aarch64) ARCH=arm64 ;; esac \
@@ -16,7 +16,7 @@ RUN ARCH="$(uname -m)" \
  && chmod +x /usr/local/bin/kubectl \
  && kubectl version --client=true --output=yaml >/dev/null
 COPY NOTICE /NOTICE
-COPY chaos /usr/local/bin/chaos
+COPY chaosbox /usr/local/bin/chaosbox
 # Network chaos needs NET_ADMIN in the target's netns; CPU/mem/io stress does not.
-ENTRYPOINT ["/usr/local/bin/chaos"]
+ENTRYPOINT ["/usr/local/bin/chaosbox"]
 CMD ["--help"]

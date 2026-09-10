@@ -5,7 +5,7 @@ whole design, and it is the point: a chaos experiment you cannot fully read in
 one sitting is one you will not run against production.
 
 ```text
-chaos <experiment> --duration Nn
+chaosbox <experiment> --duration Nn
         │
         ├── cpu / mem / io  ──► stress-ng   (this container's cgroup)
         │                        exec'd, so stress-ng owns PID 1 and its own timeout
@@ -61,7 +61,7 @@ experiments need no capabilities at all.
 
 ## Adding an experiment
 
-1. A `case` arm in `chaos`, plus its flags in the `while` parser and the
+1. A `case` arm in `chaosbox`, plus its flags in the `while` parser and the
    defaults line.
 1. Its usage line in the header comment — `usage()` prints that comment block,
    so the help text cannot drift from the script.

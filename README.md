@@ -17,30 +17,30 @@ network rules are **removed automatically on exit** (including Ctrl-C).
 ## Experiments
 
 ```text
-chaos cpu   --duration 60s [--workers 2] [--load 80]
-chaos mem   --duration 60s [--bytes 256M]
-chaos io    --duration 60s [--workers 2]
-chaos delay --duration 60s [--ms 200] [--jitter 50] [--to CIDR] [--probe URL]
-chaos loss  --duration 60s [--pct 10]
-chaos limit --duration 60s [--rate 1mbit]
-chaos kill  --duration 60s --target <pattern> [--every 20s]
+chaosbox cpu   --duration 60s [--workers 2] [--load 80]
+chaosbox mem   --duration 60s [--bytes 256M]
+chaosbox io    --duration 60s [--workers 2]
+chaosbox delay --duration 60s [--ms 200] [--jitter 50] [--to CIDR] [--probe URL]
+chaosbox loss  --duration 60s [--pct 10]
+chaosbox limit --duration 60s [--rate 1mbit]
+chaosbox kill  --duration 60s --target <pattern> [--every 20s]
             [--mode docker|k8s] [--namespace ns] [--signal SIGKILL] [--dry-run]
 ```
 
-### `chaos kill`
+### `chaosbox kill`
 
 Restarts matching workloads repeatedly for the window, then stops — the
 "does anything actually notice a pod dying?" experiment.
 
 ```sh
 # Kubernetes: label selector, one pod deleted every 20s for 5 minutes
-chaos kill --duration 5m --target app=checkout --namespace prod
+chaosbox kill --duration 5m --target app=checkout --namespace prod
 
 # Docker: name pattern, SIGTERM instead of SIGKILL
-chaos kill --duration 2m --target 'web_' --mode docker --signal SIGTERM
+chaosbox kill --duration 2m --target 'web_' --mode docker --signal SIGTERM
 
 # See what it would hit first — always worth one run
-chaos kill --duration 30s --target app=checkout --dry-run
+chaosbox kill --duration 30s --target app=checkout --dry-run
 ```
 
 The runtime is auto-detected (Docker socket present → `docker`, otherwise
@@ -66,14 +66,14 @@ Stress an existing pod's CPU (ephemeral container shares the cgroup budget):
 
 ```sh
 kubectl debug -it my-pod --image=ghcr.io/fabiocicerchia/chaos-toolbox --target=app \
-  -- chaos cpu --duration 2m --load 90
+  -- chaosbox cpu --duration 2m --load 90
 ```
 
 Add 200 ms latency to a pod's traffic (needs `NET_ADMIN`, shares the netns):
 
 ```sh
 kubectl debug -it my-pod --image=ghcr.io/fabiocicerchia/chaos-toolbox --target=app \
-  --profile=netadmin -- chaos delay --duration 60s --ms 200
+  --profile=netadmin -- chaosbox delay --duration 60s --ms 200
 ```
 
 Docker Compose resilience testing:
@@ -116,7 +116,7 @@ verbs, so you do not have to read a Makefile to find out how to build or test it
 | `build`   | Build the image locally                                 |
 | `test`    | Build, then run the smoke tests                         |
 | `lint`    | `pre-commit run --all-files` — the whole gate           |
-| `run`     | Run `chaos` from the image; `ARGS` are its arguments    |
+| `run`     | Run `chaosbox` from the image; `ARGS` are its arguments |
 | `format`  | Rewrite what the gate can fix: whitespace, endings, EOF |
 | `analyze` | `trivy fs` — the same scan CI runs                      |
 

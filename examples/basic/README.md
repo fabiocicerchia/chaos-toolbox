@@ -15,7 +15,7 @@ curl -o /dev/null -s -w 'clean:   %{time_total}s\n' http://localhost:8080/
 Start the experiment and measure again:
 
 ```sh
-docker compose -f compose.yaml up -d chaos
+docker compose -f compose.yaml up -d chaosbox
 curl -o /dev/null -s -w 'delayed: %{time_total}s\n' http://localhost:8080/
 ```
 
@@ -27,13 +27,13 @@ delay once, on the way back.
 The experiment ends by itself after 60 seconds. Before then:
 
 ```sh
-docker compose -f compose.yaml exec chaos tc qdisc show dev eth0
+docker compose -f compose.yaml exec chaosbox tc qdisc show dev eth0
 #   qdisc netem 8001: root refcnt 2 limit 1000 delay 200ms 50ms
 ```
 
 After it exits, latency is back to baseline and the qdisc is gone — the
-`trap ... EXIT` in `chaos` removes it whether the run finished, was stopped, or
-was interrupted.
+`trap ... EXIT` in `chaosbox` removes it whether the run finished, was
+stopped, or was interrupted.
 
 ```sh
 curl -o /dev/null -s -w 'after:   %{time_total}s\n' http://localhost:8080/
@@ -44,10 +44,11 @@ docker compose -f compose.yaml down
 
 ```sh
 # 10% packet loss instead of latency
-docker compose -f compose.yaml run --rm chaos loss --duration 30s --pct 10
+docker compose -f compose.yaml run --rm chaosbox loss --duration 30s --pct 10
 
 # throttle to 1 mbit
-docker compose -f compose.yaml run --rm chaos limit --duration 30s --rate 1mbit
+docker compose -f compose.yaml run --rm chaosbox \
+  limit --duration 30s --rate 1mbit
 ```
 
 Note that `cpu`, `mem` and `io` will *not* do anything useful here: Compose

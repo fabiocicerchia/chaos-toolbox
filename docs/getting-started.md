@@ -21,7 +21,7 @@ Leave `--duration` off and it refuses. That is the rail, not a bug:
 
 ```sh
 docker run --rm fabiocicerchia/chaos-toolbox cpu
-# chaos: --duration is required (safety rail)
+# chaosbox: --duration is required (safety rail)
 ```
 
 ## Stress a real workload
@@ -30,7 +30,7 @@ The experiment has to land in the *target's* cgroup, which means sharing it:
 
 ```sh
 kubectl debug -it my-pod --image=fabiocicerchia/chaos-toolbox --target=app \
-  -- chaos cpu --duration 2m --load 90
+  -- chaosbox cpu --duration 2m --load 90
 ```
 
 Without `--target=app` the ephemeral container gets its own cgroup and the
@@ -50,7 +50,7 @@ These need `NET_ADMIN` and the target's network namespace:
 
 ```sh
 kubectl debug -it my-pod --image=fabiocicerchia/chaos-toolbox --target=app \
-  --profile=netadmin -- chaos delay --duration 60s --ms 200 --jitter 50
+  --profile=netadmin -- chaosbox delay --duration 60s --ms 200 --jitter 50
 ```
 
 ```sh
@@ -63,7 +63,8 @@ container; without it the `tc` call fails with `Operation not permitted`.
 
 If the interface is not `eth0` — multus, a second NIC, a host-network pod —
 pass `--dev`. Check first with
-`kubectl debug ... -- chaos --help` and `ip -brief link` from inside the netns.
+`kubectl debug ... -- chaosbox --help` and `ip -brief link` from inside the
+netns.
 
 ## Confirm the cleanup happened
 
@@ -94,7 +95,7 @@ tc qdisc del dev eth0 root
 
 ```sh
 make build     # docker build
-make lint      # hadolint + shellcheck on `chaos`
+make lint      # hadolint + shellcheck on `chaosbox`
 make test      # smoke tests: the duration rail, cpu stress, netem apply+cleanup
 make release   # multi-arch buildx push
 ```
@@ -109,8 +110,8 @@ everything the host talks to — including the metrics pipeline and the shell
 watching the experiment. `--to` narrows them to destination CIDRs:
 
 ```sh
-chaos delay --duration 60s --ms 200 --to 10.0.3.0/24            # one dependency
-chaos loss  --duration 60s --pct 10 --to 10.0.3.7/32,10.0.4.0/24  # several
+chaosbox delay --duration 60s --ms 200 --to 10.0.3.0/24   # one dependency
+chaosbox loss  --duration 60s --pct 10 --to 10.0.3.7/32,10.0.4.0/24  # several
 ```
 
 Repeat the flag or comma-separate. Traffic to anything else is untouched, which
@@ -134,13 +135,13 @@ evidence anyone can take to a review. `--probe` samples latency against a
 target before injection and again during it:
 
 ```sh
-chaos delay --duration 60s --ms 300 \
+chaosbox delay --duration 60s --ms 300 \
   --probe http://checkout.internal/health \
   --baseline 30s --report experiment.json
 ```
 
 ```text
-chaos: experiment report — delay for 60s against http://checkout.internal/health
+chaosbox: experiment report — delay for 60s against http://checkout/health
   phase      samples  errors       p50       p90       p99
   baseline        30       0   0.0121s   0.0180s   0.0233s
   fault           59       2   0.3140s   0.3302s   0.3511s
