@@ -14,6 +14,27 @@ resilience testing without installing a full Chaos Mesh.
 Built-in safety rails: every experiment **requires `--duration`**, and
 network rules are **removed automatically on exit** (including Ctrl-C).
 
+## Features
+
+- Seven experiments in one small image: **CPU**, **memory** and **I/O**
+  pressure, **latency**, **packet loss**, **bandwidth limits**, and repeated
+  **workload kills**.
+- Every experiment **requires `--duration`** — there is no way to start one
+  that does not end.
+- Network rules are **removed automatically on exit**, Ctrl-C included, so a
+  cancelled run does not leave `tc` state behind.
+- `chaosbox kill` auto-detects the runtime (Docker socket → `docker`,
+  otherwise `kubectl`), with `--mode` to override.
+- **`--target` has no default and never will** — the blast radius of a typo
+  should be one workload, not a cluster — plus `--dry-run` to see what it
+  would hit.
+- In Kubernetes a target containing `=` is a label selector, anything else is
+  a name pattern; pods are deleted with `--wait=false`, because the experiment
+  watches the controller replace them.
+- Runs where the workload already is: `kubectl debug` into a pod's cgroup or
+  netns, or `--network container:` under Docker Compose.
+- No control plane to install — a single image instead of a full Chaos Mesh.
+
 ## Experiments
 
 ```text
