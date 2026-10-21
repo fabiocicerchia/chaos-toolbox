@@ -61,8 +61,10 @@ jobs:
       # scope has to be granted here or the release path pushes unsigned.
       id-token: write
     uses: ./.github/workflows/publish.yml
-    # A called workflow sees no caller secrets unless handed them; without this the
+    # A called workflow sees no caller secrets unless handed them; without these the
     # Docker Hub login gets empty credentials and the release never publishes.
-    secrets: inherit
+    secrets:
+      DOCKERHUB_USERNAME: ${{ secrets.DOCKERHUB_USERNAME }}
+      DOCKERHUB_TOKEN: ${{ secrets.DOCKERHUB_TOKEN }}
     with:
       tag: ${{ needs.release-please.outputs.tag_name }}
