@@ -14,6 +14,11 @@ collection of upstream tools, each redistributed under its own license:
   bash        GPL-3.0-or-later  https://git.savannah.gnu.org/cgit/bash.git
   iputils     BSD-3-Clause      https://github.com/iputils/iputils
   curl        curl (MIT-like)   https://curl.se/
+  binutils    GPL-3.0-or-later  https://www.gnu.org/software/binutils/
+              (provides readelf)
+  libfaketime GPL-2.0-only      https://github.com/wolfcw/libfaketime
+              (musl build at /opt/faketime/musl, glibc build at
+              /opt/faketime/glibc)
 
 CORRESPONDING SOURCE (GPL-2.0 section 3 / GPL-3.0 section 6)
 
@@ -24,6 +29,10 @@ Alpine publishes the corresponding source and build recipes at:
 
 Run `apk info -a <package>` inside the image to resolve the exact version
 shipped in a given tag.
+
+The one exception is the glibc libfaketime build, an unmodified Debian
+bookworm package; Debian publishes its source at
+https://sources.debian.org/src/faketime/
 
 The base image is Alpine Linux; its packages carry their own licenses
 (musl MIT, busybox GPL-2.0-only).

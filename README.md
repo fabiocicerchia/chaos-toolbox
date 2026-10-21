@@ -104,6 +104,21 @@ docker run --rm --network container:my-app --cap-add NET_ADMIN \
   ghcr.io/fabiocicerchia/chaos-toolbox loss --duration 30s --pct 15
 ```
 
+## Clock skew payload
+
+The image also ships `libfaketime.so.1` for callers that skew a workload's
+clock themselves, by copying one into the target with an init container and
+setting `LD_PRELOAD` and `FAKETIME` (for example `+5m`):
+
+| Path                                   | For targets on                      |
+| -------------------------------------- | ----------------------------------- |
+| `/opt/faketime/glibc/libfaketime.so.1` | glibc 2.34 or later                 |
+| `/opt/faketime/musl/libfaketime.so.1`  | musl (Alpine)                       |
+
+`readelf -l <binary>` picks the build: the program interpreter names the libc.
+A statically linked binary has no interpreter and ignores `LD_PRELOAD`, so it
+cannot be skewed this way.
+
 ## Verifying the image
 
 Every published image is signed with [cosign][cosign], keyless: the identity in

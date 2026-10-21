@@ -1,6 +1,6 @@
 #!/usr/bin/env sh
 # Smoke tests: duration rail enforced; cpu stress runs; netem applies and
-# cleans up after itself (needs NET_ADMIN).
+# cleans up after itself (needs NET_ADMIN); both libfaketime builds load.
 set -eu
 IMAGE="${1:?usage: test.sh <image:tag>}"
 if docker run --rm "$IMAGE" cpu 2>/dev/null; then
@@ -93,5 +93,24 @@ SH
 '
 docker run --rm --entrypoint sh "$IMAGE" -c 'command -v kubectl >/dev/null && command -v docker >/dev/null' \
   || { echo "FAIL: kill mode tooling missing from the image" >&2; exit 1; }
+
+# libfaketime: each build must preload into its own libc and shift the clock.
+# The glibc build is copied out of this image into a glibc one, as an init container would.
+docker run --rm --entrypoint sh "$IMAGE" -c '
+  readelf -d /opt/faketime/musl/libfaketime.so.1 | grep -q "libc.musl" || { echo "musl build not linked to musl" >&2; exit 1; }
+  readelf -d /opt/faketime/glibc/libfaketime.so.1 | grep -q "libc.so.6" || { echo "glibc build not linked to glibc" >&2; exit 1; }
+  readelf -l /bin/busybox | grep -q "program interpreter" || { echo "readelf cannot read the interpreter" >&2; exit 1; }
+  skew=$(( $(LD_PRELOAD=/opt/faketime/musl/libfaketime.so.1 FAKETIME=+5m date +%s) - $(date +%s) ))
+  [ "$skew" -ge 299 ] && [ "$skew" -le 301 ] || { echo "musl skew was ${skew}s" >&2; exit 1; }
+  echo faketime-musl-ok
+'
+GLIBC_IMAGE="$(docker build -q --target faketime-glibc "$(dirname "$0")")"
+docker run --rm --entrypoint cat "$IMAGE" /opt/faketime/glibc/libfaketime.so.1 \
+  | docker run --rm -i "$GLIBC_IMAGE" sh -c '
+  cat > /tmp/libfaketime.so.1
+  skew=$(( $(LD_PRELOAD=/tmp/libfaketime.so.1 FAKETIME=+5m date +%s) - $(date +%s) ))
+  [ "$skew" -ge 299 ] && [ "$skew" -le 301 ] || { echo "glibc skew was ${skew}s" >&2; exit 1; }
+  echo faketime-glibc-ok
+'
 
 echo PASS
