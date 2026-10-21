@@ -9,23 +9,10 @@ name: Publish Image
 # is the failure worth spending two minutes of runner time to avoid.
 
 on:
-  # A release published by release-please runs under GITHUB_TOKEN, and GitHub
-  # deliberately does not fire workflows from GITHUB_TOKEN events — so this
-  # trigger alone never ran. release.yml now calls this workflow directly via
-  # workflow_call; the release trigger stays for releases cut by a human.
+  # release-please publishes with RELEASE_PLEASE_TOKEN, not GITHUB_TOKEN, so this
+  # event fires; a second workflow_call path raced it and failed without secrets.
   release:
     types: [published]
-  workflow_call:
-    inputs:
-      tag:
-        description: Release tag to build.
-        required: true
-        type: string
-    secrets:
-      DOCKERHUB_USERNAME:
-        required: true
-      DOCKERHUB_TOKEN:
-        required: true
   workflow_dispatch:
     inputs:
       tag:
