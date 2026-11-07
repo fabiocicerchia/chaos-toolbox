@@ -1,0 +1,1079 @@
+{
+ "excluded": {
+  "chaos-toolbox/chaosbox": [
+   {
+    "candidate": "Missing value after an option (e.g. `--duration` last) fails with an unbound-variable error and exit 1",
+    "covered_by": "",
+    "reason": "TRIVIAL",
+    "source": "chaosbox#usage"
+   },
+   {
+    "candidate": "Numeric option values (--pct 150, --ms abc, --rate junk) are not validated and fail inside tc/stress-ng",
+    "covered_by": "",
+    "reason": "TRIVIAL",
+    "source": "chaosbox#run_experiment"
+   },
+   {
+    "candidate": "--to, --dev and network options are silently ignored by cpu/mem/io/kill",
+    "covered_by": "",
+    "reason": "TRIVIAL",
+    "source": "chaosbox#run_experiment"
+   },
+   {
+    "candidate": "No-scope delay/loss/limit degrade the whole interface",
+    "covered_by": "network.latency.delay-with-jitter",
+    "reason": "DUPLICATE_OF",
+    "source": "chaosbox#apply_netem"
+   },
+   {
+    "candidate": "Misuse prints the usage reference",
+    "covered_by": "safety.input.unknown-flag-or-experiment-refused",
+    "reason": "DUPLICATE_OF",
+    "source": "chaosbox#usage"
+   },
+   {
+    "candidate": "Prio qdisc with flat priomap and u32 filters to band 1:4",
+    "covered_by": "",
+    "reason": "INTERNAL_MECHANISM",
+    "source": "chaosbox#apply_netem"
+   },
+   {
+    "candidate": "Probe sample temp files removed on exit",
+    "covered_by": "",
+    "reason": "INTERNAL_MECHANISM",
+    "source": "chaosbox#sample_latency"
+   },
+   {
+    "candidate": "Percentiles sorted with sort(1) for busybox awk compatibility",
+    "covered_by": "",
+    "reason": "INTERNAL_MECHANISM",
+    "source": "chaosbox#percentiles"
+   },
+   {
+    "candidate": "Experiment runs in the background while probing",
+    "covered_by": "",
+    "reason": "INTERNAL_MECHANISM",
+    "source": "chaosbox#run_experiment"
+   },
+   {
+    "candidate": "Kill rounds and dry run without --duration refused",
+    "covered_by": "safety.duration.required",
+    "reason": "DUPLICATE_OF",
+    "source": "chaosbox#DURATION"
+   },
+   {
+    "candidate": "Kill failure handling identical in docker and k8s modes",
+    "covered_by": "workloads.kill.failed-kill-reported-and-counted",
+    "reason": "DUPLICATE_OF",
+    "source": "chaosbox#run_kill"
+   },
+   {
+    "candidate": "Image entrypoint/CMD --help, kubectl and libfaketime bundled in the image",
+    "covered_by": "",
+    "reason": "TECH_BUILD",
+    "source": "Dockerfile"
+   },
+   {
+    "candidate": "test.sh smoke checks",
+    "covered_by": "",
+    "reason": "TECH_DEVTOOLING",
+    "source": "test.sh"
+   }
+  ],
+  "chaos-toolbox/dockerfile": [
+   {
+    "candidate": "Base images pinned by digest (debian bookworm-slim, alpine 3.24)",
+    "covered_by": "",
+    "reason": "TECH_BUILD",
+    "source": "Dockerfile#FROM"
+   },
+   {
+    "candidate": "Multi-stage build donating only the glibc .so",
+    "covered_by": "",
+    "reason": "TECH_BUILD",
+    "source": "Dockerfile#faketime-glibc"
+   },
+   {
+    "candidate": "kubectl architecture mapping (x86_64\u2192amd64, aarch64\u2192arm64)",
+    "covered_by": "",
+    "reason": "TECH_BUILD",
+    "source": "Dockerfile#RUN"
+   },
+   {
+    "candidate": "OCI image labels (title, description, licenses, source)",
+    "covered_by": "",
+    "reason": "TECH_BUILD",
+    "source": "Dockerfile#LABEL"
+   },
+   {
+    "candidate": "NOTICE file copied to /NOTICE",
+    "covered_by": "",
+    "reason": "TECH_BUILD",
+    "source": "Dockerfile#COPY"
+   },
+   {
+    "candidate": "stress-ng, iproute2, iputils, curl, bash, binutils installed in the image",
+    "covered_by": "",
+    "reason": "INTERNAL_MECHANISM",
+    "source": "Dockerfile#RUN"
+   },
+   {
+    "candidate": "Network chaos needs NET_ADMIN while CPU/memory/IO stress does not (a comment only, nothing enforces it here)",
+    "covered_by": "",
+    "reason": "UNVERIFIABLE",
+    "source": "Dockerfile#ENTRYPOINT"
+   }
+  ],
+  "chaos-toolbox/makefile": [
+   {
+    "candidate": "make build tags the image as IMAGE:VERSION from version.txt",
+    "covered_by": "",
+    "reason": "TECH_BUILD",
+    "source": "Makefile#build"
+   },
+   {
+    "candidate": "make push builds then pushes IMAGE:VERSION",
+    "covered_by": "",
+    "reason": "TECH_BUILD",
+    "source": "Makefile#push"
+   },
+   {
+    "candidate": "make release does a multi-arch buildx build for linux/amd64,linux/arm64 and pushes both the version and latest tags",
+    "covered_by": "",
+    "reason": "TECH_BUILD",
+    "source": "Makefile#release"
+   },
+   {
+    "candidate": "make run builds the image and runs chaosbox in it with ARGS passed through",
+    "covered_by": "",
+    "reason": "TECH_DEVTOOLING",
+    "source": "Makefile#run"
+   },
+   {
+    "candidate": "make test builds the image and runs test.sh against it",
+    "covered_by": "",
+    "reason": "TECH_DEVTOOLING",
+    "source": "Makefile#test"
+   },
+   {
+    "candidate": "make lint runs every pre-commit hook over every file",
+    "covered_by": "",
+    "reason": "TECH_DEVTOOLING",
+    "source": "Makefile#lint"
+   },
+   {
+    "candidate": "make format runs the whitespace, end-of-file and line-ending fixers and ignores their rewrite exits",
+    "covered_by": "",
+    "reason": "TECH_DEVTOOLING",
+    "source": "Makefile#format"
+   },
+   {
+    "candidate": "make analyze runs a trivy filesystem scan (vuln, misconfig, secret; CRITICAL and HIGH), and exits 69 with an install hint when trivy is missing",
+    "covered_by": "",
+    "reason": "TECH_DEVTOOLING",
+    "source": "Makefile#analyze"
+   },
+   {
+    "candidate": "make setup installs the pre-commit hook",
+    "covered_by": "",
+    "reason": "TECH_DEVTOOLING",
+    "source": "Makefile#setup"
+   },
+   {
+    "candidate": "plain make (and make help) lists every documented target with its description",
+    "covered_by": "",
+    "reason": "TECH_DEVTOOLING",
+    "source": "Makefile#help"
+   }
+  ],
+  "chaos-toolbox/test": [
+   {
+    "candidate": "chaosbox refuses an experiment without --duration",
+    "covered_by": "product rule belongs to the chaosbox module (safety-rails/mandatory-duration); test.sh is a test of it",
+    "reason": "TECH_DEVTOOLING",
+    "source": "test.sh#IMAGE"
+   },
+   {
+    "candidate": "delay rules are applied during and removed after the experiment",
+    "covered_by": "chaosbox module (safety-rails/automatic-cleanup)",
+    "reason": "TECH_DEVTOOLING",
+    "source": "test.sh#IMAGE"
+   },
+   {
+    "candidate": "--to scopes delay to one destination CIDR via a prio tree and u32 filter",
+    "covered_by": "chaosbox module (network-faults/destination-targeting)",
+    "reason": "TECH_DEVTOOLING",
+    "source": "test.sh#IMAGE"
+   },
+   {
+    "candidate": "malformed --to CIDR is refused",
+    "covered_by": "chaosbox module (safety-rails/input-validation)",
+    "reason": "TECH_DEVTOOLING",
+    "source": "test.sh#IMAGE"
+   },
+   {
+    "candidate": "probe/baseline report and JSON export contents",
+    "covered_by": "chaosbox module (experiment-reports/*)",
+    "reason": "TECH_DEVTOOLING",
+    "source": "test.sh#IMAGE"
+   },
+   {
+    "candidate": "kill requires --target and --duration; dry run kills nothing",
+    "covered_by": "chaosbox module (workload-disruption/target-selection, dry-run)",
+    "reason": "TECH_DEVTOOLING",
+    "source": "test.sh#IMAGE"
+   },
+   {
+    "candidate": "glibc libfaketime build check builds a separate faketime-glibc stage and pipes the library into it",
+    "covered_by": "",
+    "reason": "TECH_BUILD",
+    "source": "test.sh#GLIBC_IMAGE"
+   },
+   {
+    "candidate": "cpu stress run with 1 worker for 2s exits cleanly",
+    "covered_by": "chaosbox module (resource-pressure/cpu-stress)",
+    "reason": "TECH_DEVTOOLING",
+    "source": "test.sh#IMAGE"
+   },
+   {
+    "candidate": "fake kubectl shim used to exercise k8s dry-run",
+    "covered_by": "",
+    "reason": "TECH_DEVTOOLING",
+    "source": "test.sh#IMAGE"
+   }
+  ],
+  "docs/stylesheets": [
+   {
+    "candidate": "Translucent, blurred header with a hairline divider and a shadow on scroll",
+    "covered_by": "",
+    "reason": "INTERNAL_MECHANISM",
+    "source": "docs/stylesheets/extra.css#.md-header"
+   },
+   {
+    "candidate": "Heading weights, letter-spacing and the h2 top margin",
+    "covered_by": "",
+    "reason": "TRIVIAL",
+    "source": "docs/stylesheets/extra.css#.md-typeset h1"
+   },
+   {
+    "candidate": "Rounded, bordered code blocks",
+    "covered_by": "",
+    "reason": "TRIVIAL",
+    "source": "docs/stylesheets/extra.css#.md-typeset .highlight"
+   },
+   {
+    "candidate": "Tables styled as bordered cards with uppercase headers",
+    "covered_by": "",
+    "reason": "TRIVIAL",
+    "source": "docs/stylesheets/extra.css#.md-typeset table:not([class])"
+   },
+   {
+    "candidate": "Pill buttons that lift on hover",
+    "covered_by": "",
+    "reason": "INTERNAL_MECHANISM",
+    "source": "docs/stylesheets/extra.css#.md-typeset .md-button"
+   },
+   {
+    "candidate": "Centred home hero layout and tagline sizing",
+    "covered_by": "",
+    "reason": "TRIVIAL",
+    "source": "docs/stylesheets/extra.css#.md-typeset .hero"
+   },
+   {
+    "candidate": "Feature cards with rounded borders, hover lift and accent-coloured icons",
+    "covered_by": "",
+    "reason": "INTERNAL_MECHANISM",
+    "source": "docs/stylesheets/extra.css#.md-typeset .grid.cards > ul > li"
+   },
+   {
+    "candidate": "Bold nav title and active nav link",
+    "covered_by": "",
+    "reason": "TRIVIAL",
+    "source": "docs/stylesheets/extra.css#.md-nav__title"
+   },
+   {
+    "candidate": "Footer background, divider and muted link colour",
+    "covered_by": "",
+    "reason": "TRIVIAL",
+    "source": "docs/stylesheets/extra.css#.md-footer-meta"
+   },
+   {
+    "candidate": "Smooth scrolling to in-page anchors",
+    "covered_by": "",
+    "reason": "TRIVIAL",
+    "source": "docs/stylesheets/extra.css#html"
+   },
+   {
+    "candidate": "Tab links dimmed until hovered or active",
+    "covered_by": "",
+    "reason": "TRIVIAL",
+    "source": "docs/stylesheets/extra.css#.md-tabs__link"
+   }
+  ]
+ },
+ "lifted": {
+  "chaos-toolbox/chaosbox": [],
+  "chaos-toolbox/dockerfile": [],
+  "chaos-toolbox/makefile": [],
+  "chaos-toolbox/test": [],
+  "docs/stylesheets": [
+   {
+    "from_source": "mkdocs.yml#theme.font",
+    "rule": "docs.site-styling.no-external-font-requests"
+   }
+  ]
+ },
+ "retired": [],
+ "scenarios": {
+  "developer-tooling.smoke-tests.001": {
+   "file": "specs/developer-tooling/smoke-tests/smoke-tests.feature",
+   "fingerprint": "56a36944ede9",
+   "human": false,
+   "rule": "devtooling.smoke-tests.image-tag-required",
+   "source": "test.sh#IMAGE",
+   "status": "inferred",
+   "test": "",
+   "tests": []
+  },
+  "developer-tooling.smoke-tests.002": {
+   "file": "specs/developer-tooling/smoke-tests/smoke-tests.feature",
+   "fingerprint": "56a36944ede9",
+   "human": false,
+   "rule": "devtooling.smoke-tests.healthy-image-passes",
+   "source": "test.sh#IMAGE",
+   "status": "inferred",
+   "test": "",
+   "tests": []
+  },
+  "developer-tooling.smoke-tests.003": {
+   "file": "specs/developer-tooling/smoke-tests/smoke-tests.feature",
+   "fingerprint": "56a36944ede9",
+   "human": false,
+   "rule": "devtooling.smoke-tests.broken-guarantee-fails-run",
+   "source": "test.sh#IMAGE",
+   "status": "inferred",
+   "test": "",
+   "tests": []
+  },
+  "developer-tooling.smoke-tests.004": {
+   "file": "specs/developer-tooling/smoke-tests/smoke-tests.feature",
+   "fingerprint": "56a36944ede9",
+   "human": false,
+   "rule": "devtooling.smoke-tests.report-check-falls-back",
+   "source": "test.sh#IMAGE",
+   "status": "inferred",
+   "test": "",
+   "tests": []
+  },
+  "documentation.docs-site-styling.001": {
+   "file": "specs/documentation/docs-site-styling/docs-site-styling.feature",
+   "fingerprint": "564588beee72",
+   "human": false,
+   "rule": "docs.site-styling.shared-accent-palette",
+   "source": "docs/stylesheets/extra.css#:root",
+   "status": "inferred",
+   "test": "",
+   "tests": []
+  },
+  "documentation.docs-site-styling.002": {
+   "file": "specs/documentation/docs-site-styling/docs-site-styling.feature",
+   "fingerprint": "564588beee72",
+   "human": false,
+   "rule": "docs.site-styling.no-external-font-requests",
+   "source": "docs/stylesheets/extra.css#:root",
+   "status": "inferred",
+   "test": "",
+   "tests": []
+  },
+  "documentation.docs-site-styling.003": {
+   "file": "specs/documentation/docs-site-styling/docs-site-styling.feature",
+   "fingerprint": "433084a194b6",
+   "human": false,
+   "rule": "docs.site-styling.legible-in-light-and-dark",
+   "source": "docs/stylesheets/extra.css#[data-md-color-scheme=\"slate\"]",
+   "status": "inferred",
+   "test": "",
+   "tests": []
+  },
+  "documentation.docs-site-styling.004": {
+   "file": "specs/documentation/docs-site-styling/docs-site-styling.feature",
+   "fingerprint": "c702704e5aae",
+   "human": false,
+   "rule": "docs.site-styling.no-placeholder-logo",
+   "source": "docs/stylesheets/extra.css#.md-header__button.md-logo",
+   "status": "inferred",
+   "test": "",
+   "tests": []
+  },
+  "experiment-reports.baseline-comparison.001": {
+   "file": "specs/experiment-reports/baseline-comparison/baseline-comparison.feature",
+   "fingerprint": "169eb1f319cf",
+   "human": false,
+   "rule": "reports.baseline.measured-before-injection",
+   "source": "chaosbox#sample_latency",
+   "status": "inferred",
+   "test": "",
+   "tests": []
+  },
+  "experiment-reports.baseline-comparison.002": {
+   "file": "specs/experiment-reports/baseline-comparison/baseline-comparison.feature",
+   "fingerprint": "b8f287636066",
+   "human": false,
+   "rule": "reports.baseline.failed-fault-still-reported",
+   "source": "chaosbox#emit_report",
+   "status": "inferred",
+   "test": "",
+   "tests": []
+  },
+  "experiment-reports.json-report.001": {
+   "file": "specs/experiment-reports/json-report/json-report.feature",
+   "fingerprint": "b8f287636066",
+   "human": false,
+   "rule": "reports.json.file-contents",
+   "source": "chaosbox#emit_report",
+   "status": "inferred",
+   "test": "",
+   "tests": []
+  },
+  "experiment-reports.json-report.002": {
+   "file": "specs/experiment-reports/json-report/json-report.feature",
+   "fingerprint": "58f3a4bc3e27",
+   "human": false,
+   "rule": "reports.json.withheld-phase-null",
+   "source": "chaosbox#phase_json",
+   "status": "inferred",
+   "test": "",
+   "tests": []
+  },
+  "experiment-reports.json-report.003": {
+   "file": "specs/experiment-reports/json-report/json-report.feature",
+   "fingerprint": "b8f287636066",
+   "human": false,
+   "rule": "reports.json.ignored-without-probe",
+   "source": "chaosbox#emit_report",
+   "status": "inferred",
+   "test": "",
+   "tests": []
+  },
+  "experiment-reports.latency-probing.001": {
+   "file": "specs/experiment-reports/latency-probing/latency-probing.feature",
+   "fingerprint": "169eb1f319cf",
+   "human": false,
+   "rule": "reports.probe.sample-classification",
+   "source": "chaosbox#sample_latency",
+   "status": "inferred",
+   "test": "",
+   "tests": []
+  },
+  "experiment-reports.latency-probing.002": {
+   "file": "specs/experiment-reports/latency-probing/latency-probing.feature",
+   "fingerprint": "169eb1f319cf",
+   "human": false,
+   "rule": "reports.probe.samples-throughout-fault-window",
+   "source": "chaosbox#sample_latency",
+   "status": "inferred",
+   "test": "",
+   "tests": []
+  },
+  "experiment-reports.percentile-summary.001": {
+   "file": "specs/experiment-reports/percentile-summary/percentile-summary.feature",
+   "fingerprint": "6d0af7d50435",
+   "human": false,
+   "rule": "reports.summary.phase-percentiles",
+   "source": "chaosbox#percentiles",
+   "status": "inferred",
+   "test": "",
+   "tests": []
+  },
+  "experiment-reports.percentile-summary.002": {
+   "file": "specs/experiment-reports/percentile-summary/percentile-summary.feature",
+   "fingerprint": "d7842d199844",
+   "human": false,
+   "rule": "reports.summary.withheld-below-minimum",
+   "source": "chaosbox#report_row",
+   "status": "inferred",
+   "test": "",
+   "tests": []
+  },
+  "experiment-reports.percentile-summary.003": {
+   "file": "specs/experiment-reports/percentile-summary/percentile-summary.feature",
+   "fingerprint": "d7842d199844",
+   "human": false,
+   "rule": "reports.summary.errors-count-toward-minimum",
+   "source": "chaosbox#report_row",
+   "status": "inferred",
+   "test": "",
+   "tests": []
+  },
+  "network-faults.bandwidth-limit.001": {
+   "file": "specs/network-faults/bandwidth-limit/bandwidth-limit.feature",
+   "fingerprint": "3504543becd2",
+   "human": false,
+   "rule": "network.bandwidth.rate-cap",
+   "source": "chaosbox#run_experiment",
+   "status": "inferred",
+   "test": "",
+   "tests": []
+  },
+  "network-faults.destination-targeting.001": {
+   "file": "specs/network-faults/destination-targeting/destination-targeting.feature",
+   "fingerprint": "75a94f18a853",
+   "human": false,
+   "rule": "network.targeting.only-matching-destinations",
+   "source": "chaosbox#apply_netem",
+   "status": "inferred",
+   "test": "",
+   "tests": []
+  },
+  "network-faults.latency-injection.001": {
+   "file": "specs/network-faults/latency-injection/latency-injection.feature",
+   "fingerprint": "75a94f18a853",
+   "human": false,
+   "rule": "network.latency.delay-with-jitter",
+   "source": "chaosbox#apply_netem",
+   "status": "inferred",
+   "test": "",
+   "tests": []
+  },
+  "network-faults.packet-loss.001": {
+   "file": "specs/network-faults/packet-loss/packet-loss.feature",
+   "fingerprint": "3504543becd2",
+   "human": false,
+   "rule": "network.loss.drop-percentage",
+   "source": "chaosbox#run_experiment",
+   "status": "inferred",
+   "test": "",
+   "tests": []
+  },
+  "packaging-distribution.container-image.001": {
+   "file": "specs/packaging-distribution/container-image/container-image.feature",
+   "fingerprint": "7bcc98f8bc13",
+   "human": false,
+   "rule": "packaging.image.runs-chaosbox-by-default",
+   "source": "Dockerfile#ENTRYPOINT",
+   "status": "inferred",
+   "test": "",
+   "tests": []
+  },
+  "packaging-distribution.container-image.002": {
+   "file": "specs/packaging-distribution/container-image/container-image.feature",
+   "fingerprint": "71f607866e7b",
+   "human": false,
+   "rule": "packaging.image.clock-skew-payload-at-fixed-paths",
+   "source": "Dockerfile#faketime-glibc",
+   "status": "inferred",
+   "test": "",
+   "tests": []
+  },
+  "packaging-distribution.container-image.003": {
+   "file": "specs/packaging-distribution/container-image/container-image.feature",
+   "fingerprint": "05ccd784d780",
+   "human": false,
+   "rule": "packaging.image.bundles-workload-kill-clients",
+   "source": "Dockerfile#KUBECTL_VERSION",
+   "status": "inferred",
+   "test": "",
+   "tests": []
+  },
+  "packaging-distribution.local-install.001": {
+   "file": "specs/packaging-distribution/local-install/local-install.feature",
+   "fingerprint": "a8e0a509303e",
+   "human": false,
+   "rule": "packaging.local-install.installs-tool-and-man-page-under-prefix",
+   "source": "Makefile#install",
+   "status": "inferred",
+   "test": "",
+   "tests": []
+  },
+  "packaging-distribution.local-install.002": {
+   "file": "specs/packaging-distribution/local-install/local-install.feature",
+   "fingerprint": "a8e0a509303e",
+   "human": false,
+   "rule": "packaging.local-install.default-prefix-is-filesystem-root",
+   "source": "Makefile#install",
+   "status": "inferred",
+   "test": "",
+   "tests": []
+  },
+  "packaging-distribution.local-install.003": {
+   "file": "specs/packaging-distribution/local-install/local-install.feature",
+   "fingerprint": "4dd5841ec3a5",
+   "human": false,
+   "rule": "packaging.local-install.uninstall-removes-installed-files",
+   "source": "Makefile#uninstall",
+   "status": "inferred",
+   "test": "",
+   "tests": []
+  },
+  "resource-pressure.cpu-stress.001": {
+   "file": "specs/resource-pressure/cpu-stress/cpu-stress.feature",
+   "fingerprint": "3504543becd2",
+   "human": false,
+   "rule": "resources.cpu.workers-at-target-load",
+   "source": "chaosbox#run_experiment",
+   "status": "inferred",
+   "test": "",
+   "tests": []
+  },
+  "resource-pressure.disk-io-stress.001": {
+   "file": "specs/resource-pressure/disk-io-stress/disk-io-stress.feature",
+   "fingerprint": "3504543becd2",
+   "human": false,
+   "rule": "resources.io.sync-workers-plus-disk-writer",
+   "source": "chaosbox#run_experiment",
+   "status": "inferred",
+   "test": "",
+   "tests": []
+  },
+  "resource-pressure.memory-stress.001": {
+   "file": "specs/resource-pressure/memory-stress/memory-stress.feature",
+   "fingerprint": "3504543becd2",
+   "human": false,
+   "rule": "resources.mem.bytes-per-worker",
+   "source": "chaosbox#run_experiment",
+   "status": "inferred",
+   "test": "",
+   "tests": []
+  },
+  "safety-rails.automatic-cleanup.001": {
+   "file": "specs/safety-rails/automatic-cleanup/automatic-cleanup.feature",
+   "fingerprint": "012a85b87dc5",
+   "human": false,
+   "rule": "safety.cleanup.removed-at-window-end",
+   "source": "chaosbox#netem_cleanup",
+   "status": "inferred",
+   "test": "",
+   "tests": []
+  },
+  "safety-rails.automatic-cleanup.002": {
+   "file": "specs/safety-rails/automatic-cleanup/automatic-cleanup.feature",
+   "fingerprint": "012a85b87dc5",
+   "human": false,
+   "rule": "safety.cleanup.removed-on-interrupt",
+   "source": "chaosbox#netem_cleanup",
+   "status": "inferred",
+   "test": "",
+   "tests": []
+  },
+  "safety-rails.automatic-cleanup.003": {
+   "file": "specs/safety-rails/automatic-cleanup/automatic-cleanup.feature",
+   "fingerprint": "3504543becd2",
+   "human": false,
+   "rule": "safety.cleanup.terminate-deferred-until-window-end",
+   "source": "chaosbox#run_experiment",
+   "status": "inferred",
+   "test": "",
+   "tests": []
+  },
+  "safety-rails.automatic-cleanup.004": {
+   "file": "specs/safety-rails/automatic-cleanup/automatic-cleanup.feature",
+   "fingerprint": "75a94f18a853",
+   "human": false,
+   "rule": "safety.cleanup.removed-on-error",
+   "source": "chaosbox#apply_netem",
+   "status": "inferred",
+   "test": "",
+   "tests": []
+  },
+  "safety-rails.automatic-cleanup.005": {
+   "file": "specs/safety-rails/automatic-cleanup/automatic-cleanup.feature",
+   "fingerprint": "012a85b87dc5",
+   "human": false,
+   "rule": "safety.cleanup.removes-foreign-root-shaping",
+   "source": "chaosbox#netem_cleanup",
+   "status": "inferred",
+   "test": "",
+   "tests": []
+  },
+  "safety-rails.input-validation.001": {
+   "file": "specs/safety-rails/input-validation/input-validation.feature",
+   "fingerprint": "18e9b737bb3d",
+   "human": false,
+   "rule": "safety.input.unknown-flag-or-experiment-refused",
+   "source": "chaosbox#usage",
+   "status": "inferred",
+   "test": "",
+   "tests": []
+  },
+  "safety-rails.input-validation.002": {
+   "file": "specs/safety-rails/input-validation/input-validation.feature",
+   "fingerprint": "ea8dc4611a6b",
+   "human": false,
+   "rule": "safety.input.malformed-cidr-refused",
+   "source": "chaosbox#valid_cidr",
+   "status": "inferred",
+   "test": "",
+   "tests": []
+  },
+  "safety-rails.input-validation.003": {
+   "file": "specs/safety-rails/input-validation/input-validation.feature",
+   "fingerprint": "e5df41405f51",
+   "human": false,
+   "rule": "safety.input.malformed-duration-not-refused",
+   "source": "chaosbox#to_seconds",
+   "status": "inferred",
+   "test": "",
+   "tests": []
+  },
+  "safety-rails.input-validation.004": {
+   "file": "specs/safety-rails/input-validation/input-validation.feature",
+   "fingerprint": "22f54b95f057",
+   "human": false,
+   "rule": "safety.input.unsupported-kill-mode",
+   "source": "chaosbox#run_kill",
+   "status": "inferred",
+   "test": "",
+   "tests": []
+  },
+  "safety-rails.mandatory-duration.001": {
+   "file": "specs/safety-rails/mandatory-duration/mandatory-duration.feature",
+   "fingerprint": "d9fea2fd1a51",
+   "human": false,
+   "rule": "safety.duration.required",
+   "source": "chaosbox#DURATION",
+   "status": "inferred",
+   "test": "",
+   "tests": []
+  },
+  "safety-rails.mandatory-duration.002": {
+   "file": "specs/safety-rails/mandatory-duration/mandatory-duration.feature",
+   "fingerprint": "e5df41405f51",
+   "human": false,
+   "rule": "safety.duration.units",
+   "source": "chaosbox#to_seconds",
+   "status": "inferred",
+   "test": "",
+   "tests": []
+  },
+  "safety-rails.usage-help.001": {
+   "file": "specs/safety-rails/usage-help/usage-help.feature",
+   "fingerprint": "18e9b737bb3d",
+   "human": false,
+   "rule": "safety.help.prints-reference",
+   "source": "chaosbox#usage",
+   "status": "inferred",
+   "test": "",
+   "tests": []
+  },
+  "workload-disruption.docker-kills.001": {
+   "file": "specs/workload-disruption/docker-kills/docker-kills.feature",
+   "fingerprint": "f85afc3b678f",
+   "human": false,
+   "rule": "workloads.docker.signal-matching-containers",
+   "source": "chaosbox#kill_one_docker",
+   "status": "inferred",
+   "test": "",
+   "tests": []
+  },
+  "workload-disruption.dry-run.001": {
+   "file": "specs/workload-disruption/dry-run/kill-dry-run.feature",
+   "fingerprint": "22f54b95f057",
+   "human": false,
+   "rule": "workloads.dryrun.lists-without-killing",
+   "source": "chaosbox#run_kill",
+   "status": "inferred",
+   "test": "",
+   "tests": []
+  },
+  "workload-disruption.kill-cadence.001": {
+   "file": "specs/workload-disruption/kill-cadence/kill-cadence.feature",
+   "fingerprint": "22f54b95f057",
+   "human": false,
+   "rule": "workloads.kill.rounds-every-interval-until-window",
+   "source": "chaosbox#run_kill",
+   "status": "inferred",
+   "test": "",
+   "tests": []
+  },
+  "workload-disruption.kill-cadence.002": {
+   "file": "specs/workload-disruption/kill-cadence/kill-cadence.feature",
+   "fingerprint": "22f54b95f057",
+   "human": false,
+   "rule": "workloads.kill.no-match-keeps-running",
+   "source": "chaosbox#run_kill",
+   "status": "inferred",
+   "test": "",
+   "tests": []
+  },
+  "workload-disruption.kill-cadence.003": {
+   "file": "specs/workload-disruption/kill-cadence/kill-cadence.feature",
+   "fingerprint": "22f54b95f057",
+   "human": false,
+   "rule": "workloads.kill.failed-kill-reported-and-counted",
+   "source": "chaosbox#run_kill",
+   "status": "inferred",
+   "test": "",
+   "tests": []
+  },
+  "workload-disruption.kubernetes-pod-kills.001": {
+   "file": "specs/workload-disruption/kubernetes-pod-kills/kubernetes-pod-kills.feature",
+   "fingerprint": "d834b0f6ef87",
+   "human": false,
+   "rule": "workloads.k8s.delete-matching-pods-without-waiting",
+   "source": "chaosbox#kill_one_k8s",
+   "status": "inferred",
+   "test": "",
+   "tests": []
+  },
+  "workload-disruption.kubernetes-pod-kills.002": {
+   "file": "specs/workload-disruption/kubernetes-pod-kills/kubernetes-pod-kills.feature",
+   "fingerprint": "3c63633c94cb",
+   "human": false,
+   "rule": "workloads.kill.mode-auto-detection",
+   "source": "chaosbox#detect_mode",
+   "status": "inferred",
+   "test": "",
+   "tests": []
+  },
+  "workload-disruption.kubernetes-pod-kills.003": {
+   "file": "specs/workload-disruption/kubernetes-pod-kills/kubernetes-pod-kills.feature",
+   "fingerprint": "d834b0f6ef87",
+   "human": false,
+   "rule": "workloads.k8s.signal-ignored",
+   "source": "chaosbox#kill_one_k8s",
+   "status": "inferred",
+   "test": "",
+   "tests": []
+  },
+  "workload-disruption.kubernetes-pod-kills.004": {
+   "file": "specs/workload-disruption/kubernetes-pod-kills/kubernetes-pod-kills.feature",
+   "fingerprint": "c42032f708ba",
+   "human": false,
+   "rule": "workloads.k8s.lookup-failure-masked",
+   "source": "chaosbox#kill_targets_k8s",
+   "status": "inferred",
+   "test": "",
+   "tests": []
+  },
+  "workload-disruption.target-selection.001": {
+   "file": "specs/workload-disruption/target-selection/kill-target-selection.feature",
+   "fingerprint": "22f54b95f057",
+   "human": false,
+   "rule": "workloads.kill.target-required",
+   "source": "chaosbox#run_kill",
+   "status": "inferred",
+   "test": "",
+   "tests": []
+  },
+  "workload-disruption.target-selection.002": {
+   "file": "specs/workload-disruption/target-selection/kill-target-selection.feature",
+   "fingerprint": "c42032f708ba",
+   "human": false,
+   "rule": "workloads.kill.target-pattern-matching",
+   "source": "chaosbox#kill_targets_k8s",
+   "status": "inferred",
+   "test": "",
+   "tests": []
+  }
+ },
+ "taxonomy": {
+  "domains": [
+   {
+    "areas": [
+     {
+      "description": "Loads a chosen number of CPU workers to a target utilisation for the experiment window.",
+      "slug": "cpu-stress",
+      "title": "CPU stress"
+     },
+     {
+      "description": "Allocates and churns a configurable amount of memory across workers to simulate memory pressure.",
+      "slug": "memory-stress",
+      "title": "Memory stress"
+     },
+     {
+      "description": "Generates sustained disk and I/O load with a configurable number of workers.",
+      "slug": "disk-io-stress",
+      "title": "Disk I/O stress"
+     }
+    ],
+    "description": "Time-boxed stress on the host's compute, memory and storage to see how workloads behave when resources run short.",
+    "slug": "resource-pressure",
+    "title": "Resource pressure"
+   },
+   {
+    "areas": [
+     {
+      "description": "Adds a fixed delay with optional jitter to outgoing packets on an interface.",
+      "slug": "latency-injection",
+      "title": "Latency injection"
+     },
+     {
+      "description": "Drops a configurable percentage of outgoing packets.",
+      "slug": "packet-loss",
+      "title": "Packet loss"
+     },
+     {
+      "description": "Caps outgoing throughput to a configured rate.",
+      "slug": "bandwidth-limit",
+      "title": "Bandwidth limit"
+     },
+     {
+      "description": "Restricts network faults to chosen destination CIDRs so one dependency is degraded while monitoring and other traffic stay untouched.",
+      "slug": "destination-targeting",
+      "title": "Destination targeting"
+     }
+    ],
+    "description": "Degrades network traffic of the container's network namespace to mimic slow, lossy or constrained links.",
+    "slug": "network-faults",
+    "title": "Network faults"
+   },
+   {
+    "areas": [
+     {
+      "description": "Requires an explicit target pattern, with no 'kill everything' default, to keep the blast radius to one workload.",
+      "slug": "target-selection",
+      "title": "Target selection"
+     },
+     {
+      "description": "Kills matching containers through the mounted Docker socket with a chosen signal.",
+      "slug": "docker-kills",
+      "title": "Docker container kills"
+     },
+     {
+      "description": "Deletes matching pods in a namespace using a kubeconfig or service account, with automatic mode detection.",
+      "slug": "kubernetes-pod-kills",
+      "title": "Kubernetes pod kills"
+     },
+     {
+      "description": "Controls how often kills repeat across the window and which signal is sent.",
+      "slug": "kill-cadence",
+      "title": "Kill cadence and signals"
+     },
+     {
+      "description": "Shows which workloads would be killed without touching them.",
+      "slug": "dry-run",
+      "title": "Dry run"
+     }
+    ],
+    "description": "Repeatedly kills matching containers or pods during the window to test restart and recovery behaviour.",
+    "slug": "workload-disruption",
+    "title": "Workload disruption"
+   },
+   {
+    "areas": [
+     {
+      "description": "Refuses to start any experiment without a --duration, with no run-until-stopped mode.",
+      "slug": "mandatory-duration",
+      "title": "Mandatory duration"
+     },
+     {
+      "description": "Removes injected network rules on normal exit, on Ctrl-C or other signals, and on error.",
+      "slug": "automatic-cleanup",
+      "title": "Automatic cleanup"
+     },
+     {
+      "description": "Rejects malformed durations, CIDRs, and unknown commands or options before anything is applied.",
+      "slug": "input-validation",
+      "title": "Input validation"
+     },
+     {
+      "description": "Prints the built-in command reference and usage on request or on misuse.",
+      "slug": "usage-help",
+      "title": "Usage help"
+     }
+    ],
+    "description": "Guarantees that every experiment is bounded in time, validated up front, and leaves nothing behind.",
+    "slug": "safety-rails",
+    "title": "Safety rails"
+   },
+   {
+    "areas": [
+     {
+      "description": "Samples a probe URL at a set interval throughout the experiment.",
+      "slug": "latency-probing",
+      "title": "Latency probing"
+     },
+     {
+      "description": "Measures a baseline window before injection and compares it with the fault window.",
+      "slug": "baseline-comparison",
+      "title": "Baseline comparison"
+     },
+     {
+      "description": "Prints latency percentiles per phase and flags when too few samples make them unreliable.",
+      "slug": "percentile-summary",
+      "title": "Percentile summary"
+     },
+     {
+      "description": "Writes the experiment parameters and phase results to a JSON file for later analysis.",
+      "slug": "json-report",
+      "title": "JSON report export"
+     }
+    ],
+    "description": "Turns an experiment into evidence by measuring a service's latency before and during the fault.",
+    "slug": "experiment-reports",
+    "title": "Experiment reports"
+   },
+   {
+    "areas": [
+     {
+      "description": "A small pinned image bundling stress-ng, tc/netem and the chaosbox tool.",
+      "slug": "container-image",
+      "title": "Container image"
+     },
+     {
+      "description": "Pushes tagged images and releases multi-architecture builds as both a version and latest.",
+      "slug": "image-publishing",
+      "title": "Image publishing"
+     },
+     {
+      "description": "Installs and uninstalls the tools and their man pages on a host, honouring DESTDIR and PREFIX.",
+      "slug": "local-install",
+      "title": "Local install"
+     },
+     {
+      "description": "Builds and runs chaosbox from the image with arguments passed straight through.",
+      "slug": "running-from-image",
+      "title": "Running from the image"
+     }
+    ],
+    "description": "How chaos-toolbox is built, shipped and installed for users.",
+    "slug": "packaging-distribution",
+    "title": "Packaging and distribution"
+   },
+   {
+    "areas": [
+     {
+      "description": "Exercises every capability against the built image to confirm behaviour and safety guarantees.",
+      "slug": "smoke-tests",
+      "title": "Smoke tests"
+     },
+     {
+      "description": "Lints and auto-formats the Dockerfile, scripts and files through the same pre-commit hooks CI uses.",
+      "slug": "quality-gate",
+      "title": "Quality gate"
+     },
+     {
+      "description": "Scans the tree for vulnerabilities, misconfigurations and leaked secrets the way CI does.",
+      "slug": "security-scanning",
+      "title": "Security scanning"
+     },
+     {
+      "description": "Installs the pre-commit hook and lists every available make command.",
+      "slug": "contributor-setup",
+      "title": "Contributor setup"
+     }
+    ],
+    "description": "The contributor workflow that keeps the project correct and secure.",
+    "slug": "developer-tooling",
+    "title": "Developer tooling"
+   },
+   {
+    "areas": [
+     {
+      "description": "Custom visual styling applied to the published documentation site.",
+      "slug": "docs-site-styling",
+      "title": "Docs site styling"
+     },
+     {
+      "description": "Command reference shipped as man pages alongside the installed tools.",
+      "slug": "manual-pages",
+      "title": "Manual pages"
+     }
+    ],
+    "description": "The user-facing reference material for chaos-toolbox.",
+    "slug": "documentation",
+    "title": "Documentation"
+   }
+  ]
+ }
+}
