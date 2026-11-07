@@ -19,6 +19,7 @@ Feature: Smoke-testing a built image
     And network rules it applies are gone when the experiment ends
     And a destination-scoped delay slows only traffic inside the named CIDR
     And a kill dry run lists matching workloads and kills none
+    And the image ships docker and kubectl, and both libfaketime builds shift the clock by the requested offset
     When the contributor runs the smoke tests against the image
     Then the run prints "PASS"
     And the run exits with a success status

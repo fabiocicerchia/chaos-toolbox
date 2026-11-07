@@ -9,17 +9,16 @@ Feature: Probing an endpoint during an experiment
   Scenario Outline: Only 2xx and 3xx probe responses count as successful samples
     Given the endpoint answers a probe with <response>
     When the operator runs `chaosbox delay --duration 60s --probe http://checkout.example.com/healthz`
-    Then that probe is counted as a sample in its phase
-    And it is counted as <counted>
+    Then that probe is recorded in its phase as <counted>
 
     Examples:
-      | response                    | counted                             |
-      | 200 OK                      | a success, timed in the percentiles |
-      | 301 Moved Permanently       | a success, timed in the percentiles |
-      | 404 Not Found               | an error, not timed                 |
-      | 503 Service Unavailable     | an error, not timed                 |
-      | no answer within 10 seconds | an error, not timed                 |
-      | connection refused          | an error, not timed                 |
+      | response                    | counted                                          |
+      | 200 OK                      | one successful sample, timed in the percentiles  |
+      | 301 Moved Permanently       | one successful sample, timed in the percentiles  |
+      | 404 Not Found               | one error sample, not timed                      |
+      | 503 Service Unavailable     | one error sample, not timed                      |
+      | no answer within 10 seconds | two error samples, neither timed                 |
+      | connection refused          | two error samples, neither timed                 |
 
   @id:experiment-reports.latency-probing.002 @rule:reports.probe.samples-throughout-fault-window @inferred @source:chaosbox#sample_latency
   Scenario Outline: The endpoint is probed throughout the fault window but not after teardown

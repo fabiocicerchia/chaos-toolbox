@@ -10,7 +10,7 @@ Feature: Degrading one dependency only
   Scenario Outline: A scoped fault degrades only traffic to the named destinations
     Given the workload talks to 10.0.4.0/24, 192.0.2.10 and 198.51.100.0/24, and to a metrics backend outside them
     When the operator runs `chaosbox delay --duration 60s --ms 300 <scope>`
-    Then chaosbox prints "chaosbox: scoped to <cidr>" for each of <scoped>
+    Then chaosbox prints a "chaosbox: scoped to" line for each of <scoped>
     And traffic to <scoped> is delayed by 300ms
     And traffic to every other destination, the metrics backend included, is not delayed
 

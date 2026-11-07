@@ -8,13 +8,13 @@ Feature: Shipping the chaos toolbox as one image
   @id:packaging-distribution.container-image.001 @rule:packaging.image.runs-chaosbox-by-default @inferred @source:Dockerfile#ENTRYPOINT
   Scenario Outline: Running the image runs chaosbox, and shows its help when given no arguments
     When the operator runs the image with <arguments>
-    Then chaosbox runs with <arguments> passed to it unchanged
+    Then chaosbox runs with <passed>
     And the operator sees <outcome>
 
     Examples:
-      | arguments                      | outcome                                         |
-      | no arguments                   | the chaosbox usage help                         |
-      | cpu --duration 10s --workers 1 | a 10 second CPU stress experiment with 1 worker |
+      | arguments                      | passed                                    | outcome                                         |
+      | no arguments                   | the image's default argument --help       | the chaosbox usage help                         |
+      | cpu --duration 10s --workers 1 | cpu --duration 10s --workers 1, unchanged | a 10 second CPU stress experiment with 1 worker |
 
   @id:packaging-distribution.container-image.002 @rule:packaging.image.clock-skew-payload-at-fixed-paths @inferred @source:Dockerfile#faketime-glibc
   Scenario Outline: The image carries a clock-skew library for glibc and for musl targets at fixed paths

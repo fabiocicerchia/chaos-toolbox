@@ -7,6 +7,7 @@ Feature: Getting the command reference
     Given the operator wants the command reference
     When the operator runs `<invocation>`
     Then chaosbox prints the reference lines for cpu, mem, io, delay, loss, limit and kill with their options
+    And the output also includes every other top-level comment in the script, starting with "!/usr/bin/env bash"
     And chaosbox exits with status 0
     And no experiment is started
 

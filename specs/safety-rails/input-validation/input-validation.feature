@@ -40,9 +40,9 @@ Feature: Refusing malformed experiments
     And chaosbox exits with a status other than 64
 
     Examples:
-      | experiment | duration | options      | effect                                                 |
-      | delay      | soon     | --ms 300     | the delay is applied to eth0 and removed again at once |
-      | kill       | 1h       | --target web | chaosbox stops with a shell arithmetic error           |
+      | experiment | duration | options                    | effect                                                 |
+      | delay      | soon     | --ms 300                   | the delay is applied to eth0 and removed again at once |
+      | kill       | 1h       | --target web --mode docker | chaosbox stops with a shell arithmetic error           |
 
   @id:safety-rails.input-validation.004 @rule:safety.input.unsupported-kill-mode @inferred @source:chaosbox#run_kill @questionable
   Scenario: An unsupported kill mode is not refused as a usage error

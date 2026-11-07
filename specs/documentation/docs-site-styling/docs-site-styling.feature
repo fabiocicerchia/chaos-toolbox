@@ -11,7 +11,7 @@ Feature: Branded, self-contained documentation site
     When a reader opens the splash page and then the docs
     Then both pages use the same accent pair, sky blue #38bdf8 and blue #3b82f6
     And primary buttons and the home hero heading show a gradient from #38bdf8 to #3b82f6
-    And the header and links use #3b82f6 in the light scheme
+    And links use #3b82f6 in the light scheme
 
   @id:documentation.docs-site-styling.002 @rule:docs.site-styling.no-external-font-requests @inferred @source:docs/stylesheets/extra.css#:root
   Scenario: The docs render in system fonts without fetching web fonts

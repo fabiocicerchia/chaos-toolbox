@@ -7,7 +7,7 @@ Feature: Exporting an experiment report
 
   @id:experiment-reports.json-report.001 @rule:reports.json.file-contents @inferred @source:chaosbox#emit_report
   Scenario Outline: The JSON report records the experiment, its parameters, duration, probe and both phases
-    Given each phase got at least 5 probes
+    Given each phase got at least 5 probes, at least one of them successful
     When the operator runs `chaosbox <command> --duration 60s --probe http://checkout.example.com/healthz --report /tmp/r.json`
     Then chaosbox prints "report written to /tmp/r.json"
     And /tmp/r.json has "experiment": "<experiment>" and "parameters": <parameters>

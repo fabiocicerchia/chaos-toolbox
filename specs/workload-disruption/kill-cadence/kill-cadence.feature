@@ -7,7 +7,7 @@ Feature: Repeating kills across the window
 
   @id:workload-disruption.kill-cadence.001 @rule:workloads.kill.rounds-every-interval-until-window @inferred @source:chaosbox#run_kill
   Scenario Outline: Kills repeat at the chosen interval and stop when the window ends
-    Given the operator has chosen kill mode docker
+    Given the Docker socket is mounted, so chaosbox detects kill mode docker
     When the operator runs `chaosbox kill --duration <duration> --target web <every option>`
     Then chaosbox prints "chaosbox: kill mode=docker target='web' every=<interval>s"
     And web_1 is killed once at the start and again every <interval> seconds

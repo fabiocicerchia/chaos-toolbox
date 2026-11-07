@@ -29,8 +29,8 @@ Feature: Deleting Kubernetes pods
     Given pod web-1 matches the target
     When the operator runs `chaosbox kill --duration 60s --mode k8s --target web-1 --signal SIGTERM`
     Then pod/web-1 is deleted with its normal graceful termination
-    And no SIGTERM or other chosen signal is sent
-    And a JSON report from the run still records "signal":"SIGTERM"
+    And chaosbox does not pass the chosen signal to Kubernetes
+    And if the run also writes a JSON report with --probe and --report, it still records "signal":"SIGTERM"
 
   @id:workload-disruption.kubernetes-pod-kills.004 @rule:workloads.k8s.lookup-failure-masked @inferred @source:chaosbox#kill_targets_k8s @questionable
   Scenario Outline: A pod lookup the cluster refuses is not reported as a permission error
