@@ -1,5 +1,11 @@
 # chaos-toolbox
 
+> [!WARNING]
+> **This project is retired** and no longer maintained. If you need something
+> for this, [Pumba](https://github.com/alexei-led/pumba) does chaos testing,
+> network emulation and stress testing for containers. It is a separate project,
+> actively developed, and worth a look.
+
 [![CI](https://github.com/fabiocicerchia/chaos-toolbox/actions/workflows/ci.yml/badge.svg)](https://github.com/fabiocicerchia/chaos-toolbox/actions/workflows/ci.yml)
 [![Code Quality](https://github.com/fabiocicerchia/chaos-toolbox/actions/workflows/code-quality.yml/badge.svg)](https://github.com/fabiocicerchia/chaos-toolbox/actions/workflows/code-quality.yml)
 [![Security](https://github.com/fabiocicerchia/chaos-toolbox/actions/workflows/security.yml/badge.svg)](https://github.com/fabiocicerchia/chaos-toolbox/actions/workflows/security.yml)
